@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:15-alpine
+    container_name: saas_postgres
+    restart: unless-stopped
+    environment:
+      # Database configuration
+      POSTGRES_DB: ${DATABASE_NAME:-saas_db}
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      # Performance tuning for development
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=en_US.UTF-8"
+      # Shared buffers (25% of RAM for production, conservative for dev)
+      POSTGRES_SHARED_BUFFERS: ${POSTGRES_SHARED_BUFFERS:-256MB}
+      POSTGRES_EFFECTIVE_CACHE_SIZE: ${POSTGRES_EFFECTIVE_CACHE_SIZE:-1GB}
+    ports:
+      - "${DATABASE_PORT:-54320}:5432"
+    volumes:
+      # Persistent data storage
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - saas_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres} -d ${DATABASE_NAME:-saas_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    command: >
+      postgres
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=8MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+      -c max_worker_processes=4
+      -c max_parallel_workers_per_gather=2
+      -c max_parallel_workers=4
+      -c max_parallel_maintenance_workers=2
+      -c log_timezone=UTC
+      -c timezone=UTC
+
+  # Backend Service (NestJS)
+  # Uncomment when Dockerfile is ready
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   container_name: saas_backend
+  #   restart: unless-stopped
+  #   environment:
+  #     # Node environment
+  #     NODE_ENV: ${NODE_ENV:-development}
+  #     # Database connection
+  #     DATABASE_HOST: postgres
+  #     DATABASE_PORT: 5432
+  #     DATABASE_NAME: ${DATABASE_NAME:-saas_db}
+  #     DATABASE_USER: ${DATABASE_USER:-postgres}
+  #     DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+  #     DATABASE_SSL: ${DATABASE_SSL:-false}
+  #     DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE:-true}
+  #     DATABASE_LOGGING: ${DATABASE_LOGGING:-true}
+  #     # Application settings
+  #     APP_PORT: ${APP_PORT:-3001}
+  #     APP_HOST: ${APP_HOST:-0.0.0.0}
+  #     # JWT Configuration
+  #     JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+  #     JWT_EXPIRATION: ${JWT_EXPIRATION:-3600}
+  #     # CORS
+  #     CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+  #   ports:
+  #     - "${APP_PORT:-3001}:3001"
+  #   volumes:
+  #     # Hot reload for development
+  #     - ./backend/src:/app/src:cached
+  #     - ./backend/test:/app/test:cached
+  #     # Prevent overwriting node_modules
+  #     - /app/node_modules
+  #   networks:
+  #     - saas_network
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-O", "-", "http://localhost:3001/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+
+  # Redis - Cache & Session Store (optional but recommended for SaaS)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: saas_redis
+  #   restart: unless-stopped
+  #   command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis}
+  #   ports:
+  #     - "${REDIS_PORT:-6379}:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - saas_network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+  #     interval: 10s
+  #     timeout: 3s
+  #     retries: 5
+
+# Named volumes for data persistence
+volumes:
+  postgres_data:
+    driver: local
+    name: saas_postgres_data
+  # redis_data:
+  #   driver: local
+  #   name: saas_redis_data
+
+# Custom network for inter-service communication
+networks:
+  saas_network:
+    driver: bridge
+    name: saas_network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

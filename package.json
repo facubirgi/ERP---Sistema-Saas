@@ -1,0 +1,52 @@
+{
+  "name": "sistema-saas-multi-tenant",
+  "version": "1.0.0",
+  "description": "Sistema completo de gestión empresarial SaaS con arquitectura multi-tenant",
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm run test",
+    "test:frontend": "cd frontend && npm run test",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "clean": "npm run clean:backend && npm run clean:frontend",
+    "clean:backend": "cd backend && rm -rf dist node_modules",
+    "clean:frontend": "cd frontend && rm -rf .next node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tu-usuario/sistema-saas.git"
+  },
+  "keywords": [
+    "saas",
+    "multi-tenant",
+    "nestjs",
+    "nextjs",
+    "typescript",
+    "postgresql",
+    "react",
+    "inventory",
+    "sales",
+    "cash-register"
+  ]
+}

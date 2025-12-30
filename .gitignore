@@ -1,0 +1,114 @@
+# ==========================================
+# DEPENDENCIES
+# ==========================================
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ==========================================
+# ENVIRONMENT VARIABLES
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ==========================================
+# PRODUCTION BUILD
+# ==========================================
+/build
+/dist
+/.next/
+/out/
+
+# ==========================================
+# IDE AND EDITOR FILES
+# ==========================================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ==========================================
+# LOGS
+# ==========================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ==========================================
+# TESTING
+# ==========================================
+/coverage
+/.nyc_output
+*.lcov
+
+# ==========================================
+# TEMPORARY FILES
+# ==========================================
+*.tmp
+*.temp
+.temp/
+.tmp/
+lint-report.txt
+lint-output.txt
+PLAN_CORRECCION_ERRORES.md
+PROGRESS_TEMPLATE.md
+REPORTE_CORRECCION_LINTING.md
+
+# ==========================================
+# OS FILES
+# ==========================================
+.DS_Store
+Thumbs.db
+*.pid
+*.seed
+*.pid.lock
+
+# ==========================================
+# DATABASE
+# ==========================================
+*.sqlite
+*.sqlite3
+*.db
+
+# ==========================================
+# DOCKER
+# ==========================================
+docker-compose.override.yml
+
+# ==========================================
+# MISC
+# ==========================================
+*.pem
+*.key
+*.cert
+.vercel
+.claude/
+
+# ==========================================
+# DOCUMENTACIÓN DEL PROYECTO
+# ==========================================
+.env.example
+.gitattributes
+CHANGELOG.md
+CONTRIBUTING.md
+DEPLOYMENT.md
+GIT_SETUP.md
+LICENSE
+PROYECTO_LISTO.md
+README.md
+SECURITY.md
+fase del desarrollo/
