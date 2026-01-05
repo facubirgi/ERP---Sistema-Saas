@@ -14,7 +14,9 @@ export default registerAs(
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
     synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
     logging: process.env.DATABASE_LOGGING === 'true',
-    ssl: process.env.DATABASE_SSL === 'true',
+    ssl: process.env.DATABASE_SSL === 'true' ? {
+      rejectUnauthorized: false
+    } : false,
     extra: {
       max: parseInt(process.env.DATABASE_POOL_MAX || '10', 10),
       min: parseInt(process.env.DATABASE_POOL_MIN || '2', 10),
