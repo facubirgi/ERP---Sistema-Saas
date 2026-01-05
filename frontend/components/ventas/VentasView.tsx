@@ -4,7 +4,7 @@
 // VENTAS VIEW - Vista de Lista de Ventas
 // ============================================================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Receipt, Search, Filter, Calendar, DollarSign, X } from 'lucide-react';
 import { useVentas } from '@/contexts/VentasContext';
 import { useAuth } from '@/contexts/AuthContext';

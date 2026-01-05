@@ -77,12 +77,13 @@ export function PaymentSection({
               id="metodo-pago"
               value={metodoPago}
               onChange={(e) => onMetodoPagoChange(e.target.value as MetodoPago)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+              style={{ color: '#000000', fontWeight: '500' }}
             >
-              <option value={MetodoPago.EFECTIVO} className="text-gray-900">Efectivo</option>
-              <option value={MetodoPago.QR} className="text-gray-900">QR</option>
-              <option value={MetodoPago.TARJETA} className="text-gray-900">Tarjeta</option>
-              <option value={MetodoPago.TRANSFERENCIA} className="text-gray-900">Transferencia</option>
+              <option value={MetodoPago.EFECTIVO} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '500' }}>Efectivo</option>
+              <option value={MetodoPago.QR} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '500' }}>QR</option>
+              <option value={MetodoPago.TARJETA} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '500' }}>Tarjeta</option>
+              <option value={MetodoPago.TRANSFERENCIA} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '500' }}>Transferencia</option>
             </select>
           </div>
         </div>

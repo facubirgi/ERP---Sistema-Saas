@@ -58,12 +58,12 @@ export function CarritoList({
               <button
                 type="button"
                 onClick={() => onActualizarCantidad(item.productoId, item.cantidad - 1)}
-                className="p-1.5 rounded hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={item.cantidad <= 1}
                 title="Disminuir cantidad"
                 aria-label={`Disminuir cantidad de ${item.nombre}`}
               >
-                <Minus size={16} />
+                <Minus size={16} className="stroke-current" />
               </button>
 
               <input
@@ -90,12 +90,12 @@ export function CarritoList({
               <button
                 type="button"
                 onClick={() => onActualizarCantidad(item.productoId, item.cantidad + 1)}
-                className="p-1.5 rounded hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={item.cantidad >= item.stockDisponible}
                 title="Aumentar cantidad"
                 aria-label={`Aumentar cantidad de ${item.nombre}`}
               >
-                <Plus size={16} />
+                <Plus size={16} className="stroke-current" />
               </button>
             </div>
 
