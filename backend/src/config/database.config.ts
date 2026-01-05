@@ -20,6 +20,9 @@ export default registerAs(
     extra: {
       max: parseInt(process.env.DATABASE_POOL_MAX || '10', 10),
       min: parseInt(process.env.DATABASE_POOL_MIN || '2', 10),
+      ssl: process.env.DATABASE_SSL === 'true' ? {
+        rejectUnauthorized: false
+      } : undefined,
     },
   }),
 );
