@@ -5,4 +5,4 @@ nixPkgs = ['nodejs_20']
 cmds = ['npm ci', 'npm run build']
 
 [phases.start]
-cmd = 'npm run start:prod'
+cmd = 'npm run start:prod:migrate'
