@@ -4,7 +4,7 @@
 // CUENTA CORRIENTE VIEW - Vista de Deudas y Saldos Pendientes
 // ============================================================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { FileText, Users, DollarSign, AlertCircle } from 'lucide-react';
 import { useVentas } from '@/contexts/VentasContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,6 +16,11 @@ export function CuentaCorrienteView() {
   const { fetchTerceros } = useVentas();
   const [clientesConDeuda, setClientesConDeuda] = useState<TerceroResponseDto[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Calcular deuda total
+  const totalDeuda = useMemo(() => {
+    return clientesConDeuda.reduce((total, cliente) => total + cliente.saldoActual, 0);
+  }, [clientesConDeuda]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
