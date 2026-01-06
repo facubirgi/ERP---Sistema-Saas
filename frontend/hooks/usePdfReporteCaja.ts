@@ -78,12 +78,12 @@ export function usePdfReporteCaja() {
   /**
    * Genera el PDF (usando importación dinámica para evitar SSR issues)
    * @returns Documento jsPDF o null si hay error
-   * 
+   *
    * NOTA: Requiere instalar las dependencias:
    * npm install jspdf jspdf-autotable
    * npm install -D @types/jspdf-autotable
    */
-  const generarPdf = useCallback(async (): Promise<unknown | null> => {
+  const generarPdf = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -92,9 +92,7 @@ export function usePdfReporteCaja() {
       if (!data) return null;
 
       // Importación dinámica de jsPDF (solo en el cliente)
-      // @ts-expect-error - jsPDF se importa dinámicamente
       const { default: jsPDF } = await import('jspdf');
-      // @ts-expect-error - jspdf-autotable se importa dinámicamente
       const autoTable = (await import('jspdf-autotable')).default;
 
       const doc = new jsPDF();
@@ -192,7 +190,7 @@ export function usePdfReporteCaja() {
         styles: { fontSize: 9 },
       });
 
-      yPos = (doc as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY + 10 || yPos;
+      yPos = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? yPos) + 10;
 
       // ==================== MOVIMIENTOS ====================
       doc.setFontSize(12);

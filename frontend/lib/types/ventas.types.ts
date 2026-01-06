@@ -639,6 +639,6 @@ export interface DetalleCotizacionResponseDto {
  * Respuesta al crear/actualizar cotización
  */
 export interface CotizacionResponseDto {
-  cotizacion: Cotizacion;
+  cotizacion: DetalleCotizacionResponseDto;
   mensaje: string;
 }
