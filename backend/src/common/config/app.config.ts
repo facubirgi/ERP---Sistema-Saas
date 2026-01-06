@@ -76,9 +76,12 @@ export const AppConfig = {
 
   /**
    * Configuración de CORS
+   * Permite múltiples orígenes separados por comas
    */
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+      : 'http://localhost:3000',
   },
 
   /**
