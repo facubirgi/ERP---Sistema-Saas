@@ -12,6 +12,9 @@ import { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 interface RequestWithTenant extends Request {
   user?: AuthenticatedUser;
   tenantId?: string;
+  body: any;
+  params: any;
+  query: any;
 }
 
 /**
