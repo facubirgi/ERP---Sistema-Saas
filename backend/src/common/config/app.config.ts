@@ -83,8 +83,9 @@ export const AppConfig = {
 
   /**
    * Puerto de la aplicación
+   * Railway usa PORT, localmente usamos APP_PORT
    */
-  port: Number(process.env.APP_PORT) || 3001,
+  port: Number(process.env.PORT || process.env.APP_PORT) || 3001,
 };
 
 /**

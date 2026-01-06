@@ -78,15 +78,18 @@ async function bootstrap() {
   });
 
   const port = AppConfig.port;
-  await app.listen(port);
+  const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+  await app.listen(port, host);
 
+  const displayHost = host === '0.0.0.0' ? '0.0.0.0 (all interfaces)' : host;
   console.log(`
   ╔════════════════════════════════════════════╗
   ║   Multi-Tenant SaaS Backend - RUNNING     ║
   ╠════════════════════════════════════════════╣
-  ║  Server:    http://localhost:${port}       ║
-  ║  Swagger:   http://localhost:${port}/api/docs ║
-  ║  Database:  PostgreSQL (port 54320)       ║
+  ║  Host:      ${displayHost.padEnd(26)} ║
+  ║  Port:      ${String(port).padEnd(26)} ║
+  ║  Swagger:   /api/docs                      ║
+  ║  Env:       ${(process.env.NODE_ENV || 'development').padEnd(26)} ║
   ╚════════════════════════════════════════════╝
   `);
 }
