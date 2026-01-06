@@ -75,7 +75,7 @@ export class AppError extends Error {
     const message = data?.message || err.message || 'Error desconocido';
 
     // Clasificar por código de estado HTTP
-    if (!error.response) {
+    if (!err.response) {
       // Error de red (sin respuesta)
       return new AppError({
         type: ErrorType.NETWORK,

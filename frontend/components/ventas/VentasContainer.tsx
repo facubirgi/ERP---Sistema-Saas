@@ -49,11 +49,6 @@ export function VentasContainer() {
     // TODO: Trigger modal de nueva venta
   };
 
-  const handleNavigateToNewCliente = () => {
-    setActiveTab('clientes');
-    // TODO: Trigger modal de nuevo cliente
-  };
-
   // Renderizar contenido según tab activo
   const renderContent = () => {
     switch (activeTab) {
@@ -62,7 +57,6 @@ export function VentasContainer() {
           <DashboardVentasView
             onNavigateToTab={handleNavigateToTab}
             onNavigateToNewVenta={handleNavigateToNewVenta}
-            onNavigateToNewCliente={handleNavigateToNewCliente}
           />
         );
       case 'ventas':
