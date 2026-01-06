@@ -16,6 +16,7 @@ import { GenerarVentaModal } from './GenerarVentaModal';
 import { useWhatsAppShare } from '@/hooks/useWhatsAppShare';
 import { WhatsAppButton } from '@/components/common';
 import { CotizacionesApi } from '@/lib/api/cotizaciones.api';
+import type { CotizacionPDFData } from '@/lib/utils/pdf.utils';
 
 interface CotizacionesViewProps {
   onNavigateToTab?: (tabId: string) => void;
