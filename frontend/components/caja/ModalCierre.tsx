@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Lock, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 import { Modal, ModalFooter } from '@/components/common/Modal';
 import { useCaja } from '@/hooks/useCaja';
+import { useExportarCobros } from '@/hooks/useExportarCobros';
 
 interface ModalCierreProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ export function ModalCierre({
   saldoEsperadoEfectivo,
 }: ModalCierreProps) {
   const { cerrarCaja, formatearMonto, calcularDiferencia, loading } = useCaja();
+  const { exportarCobros } = useExportarCobros();
 
   const [montoCierre, setMontoCierre] = useState<string>('');
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -101,7 +103,10 @@ export function ModalCierre({
       return;
     }
 
-    // Cerrar caja
+    // 1. Exportar cobros ANTES de cerrar la caja
+    await exportarCobros();
+
+    // 2. Cerrar caja
     const success = await cerrarCaja({ montoRealEfectivo: montoReal });
 
     if (success) {

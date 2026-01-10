@@ -150,7 +150,7 @@ export class ProductosApi extends BaseApiClient {
 
   /**
    * Actualizar producto existente
-   * PATCH /api/productos/:id
+   * PUT /api/productos/:id
    *
    * CARACTERÍSTICA ESPECIAL: Margen Inteligente
    * Si solo se actualiza precioCosto (sin precioVenta):
@@ -174,7 +174,7 @@ export class ProductosApi extends BaseApiClient {
     id: string,
     data: UpdateProductoDto
   ): Promise<Producto> {
-    return this.patch<Producto>(`${this.BASE_PATH}/${id}`, data);
+    return this.put<Producto>(`${this.BASE_PATH}/${id}`, data);
   }
 
   /**

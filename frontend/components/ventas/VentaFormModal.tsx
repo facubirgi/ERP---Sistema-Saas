@@ -6,8 +6,11 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { X, ShoppingCart, AlertCircle, Printer } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useVentas } from '@/contexts/VentasContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCaja } from '@/hooks/useCaja';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { useCarrito } from '@/hooks/useCarrito';
 import { useBusquedaProductos } from '@/hooks/useBusquedaProductos';
 import {
@@ -39,6 +42,9 @@ interface FormErrors {
 export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalProps) {
   const { isAuthenticated } = useAuth();
   const { crearVenta, fetchTerceros, loading } = useVentas();
+  const { sesion } = useCaja();
+  const { addNotification } = useNotifications();
+  const router = useRouter();
 
   // Ref para el comprobante
   const comprobanteRef = useRef<HTMLDivElement>(null);
@@ -221,6 +227,24 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
         return;
       }
 
+      // Validar que la caja esté abierta
+      if (!sesion || sesion.estado !== 'ABIERTA') {
+        addNotification({
+          type: 'warning',
+          title: 'Caja Cerrada',
+          message: 'Debes abrir la caja antes de registrar una venta',
+          duration: 7000,
+          action: {
+            label: 'Ir a Caja',
+            onClick: () => {
+              handleClose();
+              router.push('/dashboard/caja');
+            },
+          },
+        });
+        return;
+      }
+
       setIsSubmitting(true);
 
       try {
@@ -247,7 +271,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [validateForm, obtenerItems, montoPagado, clienteId, metodoPago, crearVenta, onSuccess]
+    [validateForm, obtenerItems, montoPagado, clienteId, metodoPago, crearVenta, onSuccess, sesion, addNotification, router]
   );
 
   const handleClose = useCallback(() => {

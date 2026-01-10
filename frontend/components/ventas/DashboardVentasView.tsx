@@ -70,8 +70,6 @@ export function DashboardVentasView({
     let mounted = true;
     
     const fetchData = async () => {
-      if (isLoadingData) return;
-
       setIsLoadingData(true);
       try {
         console.log('[DEBUG] Fetching ventas and terceros...');
@@ -84,7 +82,9 @@ export function DashboardVentasView({
         if (!mounted) return;
 
         console.log('[DEBUG] Ventas response:', ventasResponse);
+        console.log('[DEBUG] Ventas count:', ventasResponse?.length || 0);
         console.log('[DEBUG] Terceros response:', tercerosResponse);
+        console.log('[DEBUG] Terceros count:', tercerosResponse?.length || 0);
 
         if (ventasResponse && tercerosResponse) {
           setRecentVentas(ventasResponse.slice(0, 5));
@@ -93,10 +93,12 @@ export function DashboardVentasView({
           const metrics = calcularMetricasFromData(ventasResponse, tercerosResponse);
           console.log('[DEBUG] Calculated metrics:', metrics);
           setMetricas(metrics);
+        } else {
+          console.warn('[DEBUG] ventasResponse or tercerosResponse is null/undefined');
         }
       } catch (error) {
         if (mounted) {
-          console.error('Error loading dashboard data:', error);
+          console.error('[ERROR] Error loading dashboard data:', error);
         }
       } finally {
         if (mounted) {
@@ -110,7 +112,7 @@ export function DashboardVentasView({
     return () => {
       mounted = false;
     };
-  }, [isAuthenticated, authLoading, fetchVentas, fetchTerceros, isLoadingData]);
+  }, [isAuthenticated, authLoading, fetchVentas, fetchTerceros]);
 
   // ============================================================================
   // FUNCIONES
@@ -124,34 +126,57 @@ export function DashboardVentasView({
     ventasData: VentaListItemDto[],
     tercerosData: TerceroResponseDto[]
   ) => {
+    console.log('[DEBUG calcularMetricas] Calculando métricas...');
+    console.log('[DEBUG calcularMetricas] Total ventas recibidas:', ventasData.length);
+    console.log('[DEBUG calcularMetricas] Total terceros recibidos:', tercerosData.length);
+    
     const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    const añoHoy = hoy.getFullYear();
+    const mesHoy = hoy.getMonth();
+    const diaHoy = hoy.getDate();
 
-    // Ventas de hoy
+    console.log('[DEBUG calcularMetricas] Fecha hoy:', `${añoHoy}-${mesHoy + 1}-${diaHoy}`);
+
+    // Ventas de hoy - Comparación más robusta por componentes de fecha
     const ventasHoy = ventasData.filter((v) => {
       const fechaVenta = new Date(v.createdAt);
-      fechaVenta.setHours(0, 0, 0, 0);
-      return fechaVenta.getTime() === hoy.getTime();
+      const esHoy = (
+        fechaVenta.getFullYear() === añoHoy &&
+        fechaVenta.getMonth() === mesHoy &&
+        fechaVenta.getDate() === diaHoy
+      );
+      if (esHoy) {
+        console.log('[DEBUG calcularMetricas] Venta de hoy:', v.id, new Date(v.createdAt));
+      }
+      return esHoy;
     });
+
+    console.log('[DEBUG calcularMetricas] Ventas de hoy encontradas:', ventasHoy.length);
 
     // Ventas pendientes de cobro
     const ventasPendientes = ventasData.filter(
       (v) => v.estadoPago === EstadoPago.PENDIENTE || v.estadoPago === EstadoPago.PARCIAL
     );
 
+    console.log('[DEBUG calcularMetricas] Ventas pendientes:', ventasPendientes.length);
+
     // Clientes con deuda
     const clientesConDeuda = tercerosData.filter(
       (t) => t.tipo === TipoTercero.CLIENTE && t.saldoActual > 0
     );
 
-    // Ventas del mes
-    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    // Ventas del mes actual
     const ventasDelMes = ventasData.filter((v) => {
       const fechaVenta = new Date(v.createdAt);
-      return fechaVenta >= inicioMes;
+      return (
+        fechaVenta.getFullYear() === añoHoy &&
+        fechaVenta.getMonth() === mesHoy
+      );
     });
 
-    return {
+    console.log('[DEBUG calcularMetricas] Ventas del mes:', ventasDelMes.length);
+
+    const metrics = {
       totalVentasHoy: ventasHoy.length,
       montoVentasHoy: ventasHoy.reduce((sum, v) => sum + v.total, 0),
       ventasPendienteCobro: ventasPendientes.length,
@@ -161,6 +186,10 @@ export function DashboardVentasView({
       ventasDelMes: ventasDelMes.length,
       montoDelMes: ventasDelMes.reduce((sum, v) => sum + v.total, 0),
     };
+
+    console.log('[DEBUG calcularMetricas] Métricas finales:', metrics);
+
+    return metrics;
   };
 
   const loadDashboardData = async () => {
@@ -169,30 +198,56 @@ export function DashboardVentasView({
 
     setIsLoadingData(true);
     try {
-      console.log('[DEBUG] Fetching ventas and terceros...');
+      console.log('[DEBUG loadDashboardData] Fetching ventas and terceros...');
 
       const [ventasResponse, tercerosResponse] = await Promise.all([
         fetchVentas(),
         fetchTerceros({ tipo: TipoTercero.CLIENTE }),
       ]);
 
-      console.log('[DEBUG] Ventas response:', ventasResponse);
-      console.log('[DEBUG] Terceros response:', tercerosResponse);
+      console.log('[DEBUG loadDashboardData] Ventas response:', ventasResponse);
+      console.log('[DEBUG loadDashboardData] Terceros response:', tercerosResponse);
 
       if (ventasResponse && tercerosResponse) {
         setRecentVentas(ventasResponse.slice(0, 5));
         const conDeuda = tercerosResponse.filter((t) => t.saldoActual > 0);
         setClientesConDeuda(conDeuda.slice(0, 5));
         const metrics = calcularMetricasFromData(ventasResponse, tercerosResponse);
-        console.log('[DEBUG] Calculated metrics:', metrics);
+        console.log('[DEBUG loadDashboardData] Calculated metrics:', metrics);
         setMetricas(metrics);
       }
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('[ERROR loadDashboardData] Error loading dashboard data:', error);
     } finally {
       setIsLoadingData(false);
     }
   };
+
+  // Función para debug - llamar desde consola del navegador
+  const testFetchData = async () => {
+    console.log('[TEST] Starting test fetch...');
+    try {
+      const ventasResp = await fetchVentas();
+      console.log('[TEST] Ventas response:', ventasResp);
+      console.log('[TEST] Ventas count:', ventasResp?.length || 0);
+      
+      const tercerosResp = await fetchTerceros({ tipo: TipoTercero.CLIENTE });
+      console.log('[TEST] Terceros response:', tercerosResp);
+      console.log('[TEST] Terceros count:', tercerosResp?.length || 0);
+      
+      if (ventasResp && tercerosResp) {
+        const testMetrics = calcularMetricasFromData(ventasResp, tercerosResp);
+        console.log('[TEST] Test metrics:', testMetrics);
+      }
+    } catch (error) {
+      console.error('[TEST ERROR]:', error);
+    }
+  };
+
+  // Exponer función de test en window para debugging
+  if (typeof window !== 'undefined') {
+    (window as any).testDashboardFetch = testFetchData;
+  }
 
   const handleOpenClienteModal = () => {
     setIsClienteModalOpen(true);
@@ -229,8 +284,29 @@ export function DashboardVentasView({
 
   return (
     <div className="space-y-8">
+      {/* Header con botones de acción y debug */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">Dashboard de Ventas</h2>
+        <div className="flex gap-3">
+          <button
+            onClick={loadDashboardData}
+            disabled={isLoadingData}
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition-colors disabled:opacity-50"
+          >
+            {isLoadingData ? 'Cargando...' : 'Refrescar'}
+          </button>
+          <button
+            onClick={onNavigateToNewVenta}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
+          >
+            <Plus size={20} />
+            Nueva Venta
+          </button>
+        </div>
+      </div>
+
       {/* Métricas Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         <MetricCard
           title="Ventas Hoy"
           value={metricas.totalVentasHoy}

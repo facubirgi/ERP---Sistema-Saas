@@ -28,6 +28,7 @@ export function VentasView() {
   const [isCobroModalOpen, setIsCobroModalOpen] = useState(false);
   const [ventaSeleccionada, setVentaSeleccionada] = useState<VentaListItemDto | null>(null);
   const [isFiltrosOpen, setIsFiltrosOpen] = useState(false);
+  const [busquedaCliente, setBusquedaCliente] = useState('');
   const [filtros, setFiltros] = useState<Filtros>({
     fechaDesde: '',
     fechaHasta: '',
@@ -185,6 +186,14 @@ export function VentasView() {
     return !!(filtrosAplicados.fechaDesde || filtrosAplicados.fechaHasta || filtrosAplicados.estadoPago);
   };
 
+  // Filtrar ventas por búsqueda de cliente
+  const ventasFiltradas = ventas.filter((venta) => {
+    if (!busquedaCliente.trim()) return true;
+    
+    const nombreCliente = venta.tercero?.nombre || '';
+    return nombreCliente.toLowerCase().includes(busquedaCliente.toLowerCase());
+  });
+
   // Recargar ventas cuando cambien los filtros aplicados
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -243,7 +252,9 @@ export function VentasView() {
               <input
                 type="text"
                 placeholder="Buscar por cliente..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={busquedaCliente}
+                onChange={(e) => setBusquedaCliente(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
               />
             </div>
           </div>
@@ -273,7 +284,7 @@ export function VentasView() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Cargando ventas...</p>
           </div>
-        ) : ventas.length > 0 ? (
+        ) : ventasFiltradas.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -302,9 +313,9 @@ export function VentasView() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {ventas.map((venta, index) => {
+                {ventasFiltradas.map((venta, index) => {
                   // Detectar si hay cambio de estado respecto a la fila anterior
-                  const estadoAnterior = index > 0 ? ventas.at(index - 1)?.estadoPago : null;
+                  const estadoAnterior = index > 0 ? ventasFiltradas.at(index - 1)?.estadoPago : null;
                   const cambioEstado = estadoAnterior && estadoAnterior !== venta.estadoPago;
 
                   return (

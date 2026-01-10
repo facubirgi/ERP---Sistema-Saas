@@ -1,11 +1,9 @@
 import React from 'react';
-import { FileText, Minus, FileSpreadsheet } from 'lucide-react';
+import { Minus, FileSpreadsheet } from 'lucide-react';
 
 interface BarraAccionesProps {
   onRegistrarGasto: () => void;
-  onGenerarReporte: () => void;
   onExportarCobros: () => void;
-  loadingReporte?: boolean;
   loadingExportacion?: boolean;
 }
 
@@ -14,7 +12,7 @@ interface BarraAccionesProps {
  *
  * Barra de botones de acciones rápidas:
  * 1. Registrar Gasto/Retiro (primario)
- * 2. Generar Reporte Diario (secundario)
+ * 2. Exportar Cobros (secundario)
  *
  * Layout:
  * - Flexbox horizontal en desktop
@@ -22,9 +20,7 @@ interface BarraAccionesProps {
  */
 export const BarraAcciones = React.memo(function BarraAcciones({
   onRegistrarGasto,
-  onGenerarReporte,
   onExportarCobros,
-  loadingReporte = false,
   loadingExportacion = false,
 }: BarraAccionesProps) {
   return (
@@ -48,17 +44,6 @@ export const BarraAcciones = React.memo(function BarraAcciones({
       >
         <FileSpreadsheet size={18} aria-hidden="true" />
         <span>{loadingExportacion ? 'Exportando...' : 'Exportar Cobros (Excel)'}</span>
-      </button>
-
-      {/* Botón Generar Reporte */}
-      <button
-        type="button"
-        onClick={onGenerarReporte}
-        disabled={loadingReporte}
-        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <FileText size={18} aria-hidden="true" />
-        <span>{loadingReporte ? 'Generando...' : 'Reporte Diario (PDF)'}</span>
       </button>
     </div>
   );

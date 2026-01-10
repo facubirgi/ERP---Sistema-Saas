@@ -146,7 +146,7 @@ export function ModalRegistrarGasto({
         <div className="mb-4">
           <label
             htmlFor="concepto"
-            className="block text-sm font-medium text-gray-900 mb-2"
+            className="block text-sm font-bold text-black mb-2"
           >
             Concepto <span className="text-red-500">*</span>
           </label>
@@ -157,7 +157,7 @@ export function ModalRegistrarGasto({
             value={formData.concepto}
             onChange={handleChange}
             placeholder="Ej: Pago de servicios, Compra de insumos..."
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 placeholder-gray-400 ${
               validationErrors.concepto
                 ? 'border-red-500'
                 : 'border-gray-300'
@@ -177,7 +177,7 @@ export function ModalRegistrarGasto({
         <div className="mb-4">
           <label
             htmlFor="monto"
-            className="block text-sm font-medium text-gray-900 mb-2"
+            className="block text-sm font-bold text-black mb-2"
           >
             Monto <span className="text-red-500">*</span>
           </label>
@@ -191,7 +191,7 @@ export function ModalRegistrarGasto({
             step="0.01"
             min="0"
             placeholder="0.00"
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 placeholder-gray-400 ${
               validationErrors.monto
                 ? 'border-red-500'
                 : 'border-gray-300'
@@ -210,7 +210,7 @@ export function ModalRegistrarGasto({
         <div className="mb-4">
           <label
             htmlFor="metodoPago"
-            className="block text-sm font-medium text-gray-900 mb-2"
+            className="block text-sm font-bold text-black mb-2"
           >
             Método de Pago
           </label>
@@ -219,7 +219,7 @@ export function ModalRegistrarGasto({
             name="metodoPago"
             value={formData.metodoPago}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900"
           >
             {Object.values(MetodoPagoCaja).map((metodo) => (
               <option key={metodo} value={metodo}>
@@ -233,7 +233,7 @@ export function ModalRegistrarGasto({
         <div className="mb-6">
           <label
             htmlFor="referencia"
-            className="block text-sm font-medium text-gray-900 mb-2"
+            className="block text-sm font-bold text-black mb-2"
           >
             Referencia (Opcional)
           </label>
@@ -244,7 +244,7 @@ export function ModalRegistrarGasto({
             value={formData.referencia}
             onChange={handleChange}
             placeholder="Ej: Factura #123, Boleta, etc."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 placeholder-gray-400"
           />
         </div>
 

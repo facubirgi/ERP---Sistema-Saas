@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Lock } from 'lucide-react';
 import { useCaja } from '@/hooks/useCaja';
-import { usePdfReporteCaja } from '@/hooks/usePdfReporteCaja';
 import { useExportarCobros } from '@/hooks';
 import { KpisCaja } from './KpisCaja';
 import { BarraAcciones } from './BarraAcciones';
@@ -39,7 +38,6 @@ export function VistaCajaAbierta() {
     formatearHora,
   } = useCaja();
 
-  const { descargarPdf, loading: loadingPdf } = usePdfReporteCaja();
   const { exportarCobros, loading: loadingExportacion } = useExportarCobros();
 
   const [isGastoModalOpen, setIsGastoModalOpen] = useState(false);
@@ -64,8 +62,6 @@ export function VistaCajaAbierta() {
       <BarraAcciones
         onRegistrarGasto={() => setIsGastoModalOpen(true)}
         onExportarCobros={exportarCobros}
-        onGenerarReporte={descargarPdf}
-        loadingReporte={loadingPdf}
         loadingExportacion={loadingExportacion}
       />
 

@@ -22,6 +22,7 @@ export function ClientesView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCliente, setSelectedCliente] = useState<TerceroResponseDto | null>(null);
   const [filtroTipo, setFiltroTipo] = useState<FiltroTipo>('TODOS');
+  const [busquedaNombre, setBusquedaNombre] = useState('');
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -134,7 +135,9 @@ export function ClientesView() {
           <input
             type="text"
             placeholder="Buscar por nombre..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            value={busquedaNombre}
+            onChange={(e) => setBusquedaNombre(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 placeholder-gray-500"
           />
         </div>
       </div>
@@ -146,8 +149,14 @@ export function ClientesView() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Cargando clientes...</p>
           </div>
-        ) : clientes.length > 0 ? (
-          clientes.map((cliente) => {
+        ) : clientes.filter((cliente) => {
+          if (!busquedaNombre.trim()) return true;
+          return cliente.nombre.toLowerCase().includes(busquedaNombre.toLowerCase());
+        }).length > 0 ? (
+          clientes.filter((cliente) => {
+            if (!busquedaNombre.trim()) return true;
+            return cliente.nombre.toLowerCase().includes(busquedaNombre.toLowerCase());
+          }).map((cliente) => {
             const isCliente = cliente.tipo === TipoTercero.CLIENTE;
             const bgColor = isCliente ? 'from-purple-500 to-purple-600' : 'from-blue-500 to-blue-600';
             const borderHover = isCliente ? 'hover:border-purple-300' : 'hover:border-blue-300';
