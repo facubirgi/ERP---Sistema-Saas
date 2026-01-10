@@ -7,7 +7,7 @@
  */
 export const GRADIENTS = {
   // Gradientes principales
-  BLUE: 'bg-gradient-to-r from-blue-600 to-blue-700',
+  BLUE: 'bg-gradient-to-r from-red-600 to-red-700',
   PURPLE: 'bg-gradient-to-r from-purple-600 to-purple-700',
   GREEN: 'bg-gradient-to-r from-green-600 to-green-700',
   RED: 'bg-gradient-to-r from-red-600 to-red-700',
@@ -15,7 +15,7 @@ export const GRADIENTS = {
   ORANGE: 'bg-gradient-to-r from-orange-600 to-orange-700',
   
   // Gradientes de íconos (br = bottom-right)
-  BLUE_BR: 'bg-gradient-to-br from-blue-500 to-blue-600',
+  BLUE_BR: 'bg-gradient-to-br from-red-500 to-red-600',
   PURPLE_BR: 'bg-gradient-to-br from-purple-500 to-purple-600',
   GREEN_BR: 'bg-gradient-to-br from-green-500 to-green-600',
   RED_BR: 'bg-gradient-to-br from-red-500 to-red-600',
@@ -31,7 +31,7 @@ export const BADGE_STYLES = {
   SUCCESS: 'bg-green-100 text-green-800 border-green-200',
   WARNING: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   DANGER: 'bg-red-100 text-red-800 border-red-200',
-  INFO: 'bg-blue-100 text-blue-800 border-blue-200',
+  INFO: 'bg-red-100 text-red-800 border-red-200',
   NEUTRAL: 'bg-gray-100 text-gray-800 border-gray-200',
 } as const;
 
@@ -39,7 +39,7 @@ export const BADGE_STYLES = {
  * Estilos de botones primarios
  */
 export const BUTTON_STYLES = {
-  PRIMARY: 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium',
+  PRIMARY: 'px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium',
   SECONDARY: 'px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium',
   SUCCESS: 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium',
   DANGER: 'px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium',
@@ -51,7 +51,7 @@ export const BUTTON_STYLES = {
  * Estilos de inputs
  */
 export const INPUT_STYLES = {
-  BASE: 'w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:border-blue-500',
+  BASE: 'w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:border-red-500',
   ERROR: 'border-red-300 focus:ring-red-500',
   SUCCESS: 'border-green-300 focus:ring-green-500',
 } as const;

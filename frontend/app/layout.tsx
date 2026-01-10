@@ -16,6 +16,19 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "ESimple - Sistema de Gestión",
   description: "Sistema multi-tenant de gestión para comercios minoristas",
+  icons: {
+    icon: [
+      {
+        url: '/logo.jpeg',
+        type: 'image/jpeg',
+      }
+    ],
+    shortcut: '/logo.jpeg',
+    apple: {
+      url: '/logo.jpeg',
+      type: 'image/jpeg',
+    },
+  },
 };
 
 export default function RootLayout({

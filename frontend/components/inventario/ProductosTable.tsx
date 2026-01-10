@@ -46,7 +46,7 @@ export function ProductosTable({
           <p className="font-semibold text-gray-900">{prod.nombre}</p>
           {prod.categoria && (
             <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
-              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+              <span className="w-1.5 h-1.5 bg-red-400 rounded-full"></span>
               {prod.categoria.nombre}
             </p>
           )}
@@ -92,7 +92,7 @@ export function ProductosTable({
           </button>
           <button
             onClick={() => onEdit(prod)}
-            className="p-2 text-blue-600 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-all duration-200 hover:scale-110"
+            className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
             title="Editar"
           >
             <Edit size={18} />

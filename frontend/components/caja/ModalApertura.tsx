@@ -99,7 +99,7 @@ export function ModalApertura({
             step="0.01"
             min="0"
             placeholder="0.00"
-            className="w-full px-4 py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-400"
+            className="w-full px-4 py-3 text-lg font-semibold border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 placeholder:text-gray-400"
             aria-describedby={validationError ? 'monto-error' : undefined}
             aria-invalid={!!validationError}
             autoFocus
@@ -110,7 +110,7 @@ export function ModalApertura({
           {montoApertura && !isNaN(parseFloat(montoApertura)) && (
             <p className="mt-2 text-sm text-gray-600">
               Equivale a:{' '}
-              <span className="font-semibold text-blue-600">
+              <span className="font-semibold text-red-600">
                 {formatearMonto(parseFloat(montoApertura))}
               </span>
             </p>
@@ -144,7 +144,7 @@ export function ModalApertura({
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
             {loading ? 'Abriendo...' : 'Abrir Caja'}

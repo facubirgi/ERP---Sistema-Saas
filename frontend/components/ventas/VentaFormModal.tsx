@@ -316,7 +316,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
           aria-labelledby="modal-title"
         >
           {/* Header */}
-          <div className="bg-linear-to-r from-blue-600 to-blue-700 px-6 py-5">
+          <div className="bg-linear-to-r from-red-600 to-red-700 px-6 py-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <ShoppingCart className="text-white" size={28} aria-hidden="true" />
@@ -324,7 +324,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
                   <h3 id="modal-title" className="text-xl font-bold text-white">
                     Nueva Venta
                   </h3>
-                  <p className="text-sm text-blue-100">{clienteNombre}</p>
+                  <p className="text-sm text-red-100">{clienteNombre}</p>
                 </div>
               </div>
               <button
@@ -360,7 +360,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
                 id="cliente"
                 value={clienteId}
                 onChange={(e) => handleSelectCliente(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
               >
                 <option value="" className="text-gray-500">Venta Anónima</option>
                 {clientes.map((cliente) => (
@@ -429,7 +429,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
               <button
                 type="submit"
                 disabled={isSubmitting || loading || carrito.length === 0}
-                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 {isSubmitting || loading ? (
                   <span className="flex items-center justify-center gap-2">

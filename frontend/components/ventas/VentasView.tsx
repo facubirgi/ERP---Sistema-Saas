@@ -239,7 +239,7 @@ export function VentasView() {
           <h3 className="text-lg font-bold text-gray-900">Lista de Ventas</h3>
           <button
             onClick={handleOpenModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
           >
             + Nueva Venta
           </button>
@@ -254,7 +254,7 @@ export function VentasView() {
                 placeholder="Buscar por cliente..."
                 value={busquedaCliente}
                 onChange={(e) => setBusquedaCliente(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900 placeholder-gray-500"
               />
             </div>
           </div>
@@ -262,14 +262,14 @@ export function VentasView() {
             onClick={handleOpenFiltros}
             className={`px-4 py-2 border rounded-lg transition-colors flex items-center gap-2 ${
               tieneFiltrosActivos()
-                ? 'border-blue-600 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                ? 'border-red-600 bg-red-50 text-red-700 hover:bg-red-100'
                 : 'border-gray-300 hover:bg-gray-50'
             }`}
           >
             <Filter size={20} />
             Filtros
             {tieneFiltrosActivos() && (
-              <span className="ml-1 px-2 py-0.5 bg-blue-600 text-white text-xs font-semibold rounded-full">
+              <span className="ml-1 px-2 py-0.5 bg-red-600 text-white text-xs font-semibold rounded-full">
                 ✓
               </span>
             )}
@@ -281,7 +281,7 @@ export function VentasView() {
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Cargando ventas...</p>
           </div>
         ) : ventasFiltradas.length > 0 ? (
@@ -377,7 +377,7 @@ export function VentasView() {
             <p className="text-gray-600 mb-6">Comienza registrando tu primera venta</p>
             <button
               onClick={handleOpenModal}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               + Registrar Venta
             </button>
@@ -413,7 +413,7 @@ export function VentasView() {
           <div className="flex min-h-full items-center justify-center p-4">
             <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all">
               {/* Header */}
-              <div className="bg-linear-to-r from-blue-600 to-blue-700 px-6 py-5">
+              <div className="bg-linear-to-r from-red-600 to-red-700 px-6 py-5">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold text-white">Filtrar Ventas</h3>
                   <button
@@ -445,7 +445,7 @@ export function VentasView() {
                       type="date"
                       value={filtros.fechaDesde}
                       onChange={(e) => handleChangeFiltro('fechaDesde', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900 bg-white"
                     />
                   </div>
                 </div>
@@ -465,7 +465,7 @@ export function VentasView() {
                       type="date"
                       value={filtros.fechaHasta}
                       onChange={(e) => handleChangeFiltro('fechaHasta', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900 bg-white"
                     />
                   </div>
                 </div>
@@ -484,7 +484,7 @@ export function VentasView() {
                       id="estadoPago"
                       value={filtros.estadoPago}
                       onChange={(e) => handleChangeFiltro('estadoPago', e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white appearance-none cursor-pointer"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900 bg-white appearance-none cursor-pointer"
                     >
                       <option value="">Todos los estados</option>
                       <option value="PENDIENTE">🔴 Pendiente</option>
@@ -496,11 +496,11 @@ export function VentasView() {
 
                 {/* Indicador de resultados */}
                 {(filtros.fechaDesde || filtros.fechaHasta || filtros.estadoPago) && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-sm text-blue-800 font-medium">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-sm text-red-800 font-medium">
                       Filtros seleccionados:
                     </p>
-                    <ul className="mt-2 space-y-1 text-sm text-blue-700">
+                    <ul className="mt-2 space-y-1 text-sm text-red-700">
                       {filtros.fechaDesde && (
                         <li>• Desde: {formatDate(new Date(filtros.fechaDesde))}</li>
                       )}
@@ -526,7 +526,7 @@ export function VentasView() {
                   <button
                     type="button"
                     onClick={handleAplicarFiltros}
-                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                    className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
                   >
                     Aplicar Filtros
                   </button>

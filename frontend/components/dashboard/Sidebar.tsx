@@ -27,7 +27,7 @@ interface SidebarProps {
 
 const sidebarItems: SidebarItem[] = [
   {
-    name: 'Dashboard',
+    name: 'Tu Negocio',
     icon: LayoutDashboard,
     path: '/dashboard',
   },
@@ -99,7 +99,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
                   onClick={() => handleNavigation(item.path)}
                   className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-red-600 text-white'
                       : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                   }`}
                   title={isCollapsed ? item.name : undefined}

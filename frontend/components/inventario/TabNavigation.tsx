@@ -43,7 +43,7 @@ export function TabNavigation({
                 transition-all duration-300 ease-out relative
                 ${
                   isActive
-                    ? 'border-blue-600 text-blue-600'
+                    ? 'border-red-600 text-red-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }
               `}
@@ -51,7 +51,7 @@ export function TabNavigation({
               {/* Background hover effect */}
               <div className={`absolute inset-0 rounded-t-lg transition-all duration-300 ${
                 isActive
-                  ? 'bg-blue-50/50'
+                  ? 'bg-red-50/50'
                   : 'bg-transparent group-hover:bg-gray-50'
               }`}></div>
 
@@ -59,7 +59,7 @@ export function TabNavigation({
               <Icon
                 className={`
                   relative -ml-0.5 mr-2 h-5 w-5 transition-all duration-300
-                  ${isActive ? 'text-blue-600 scale-110' : 'text-gray-400 group-hover:text-gray-600 group-hover:scale-105'}
+                  ${isActive ? 'text-red-600 scale-110' : 'text-gray-400 group-hover:text-gray-600 group-hover:scale-105'}
                 `}
               />
 
@@ -74,7 +74,7 @@ export function TabNavigation({
                     transition-all duration-300 transform
                     ${
                       isActive
-                        ? 'bg-blue-600 text-white shadow-md scale-105'
+                        ? 'bg-red-600 text-white shadow-md scale-105'
                         : 'bg-gray-200 text-gray-600 group-hover:bg-gray-300'
                     }
                   `}
@@ -85,7 +85,7 @@ export function TabNavigation({
 
               {/* Active indicator line with gradient */}
               {isActive && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-blue-400 via-blue-600 to-blue-400"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-red-400 via-red-600 to-red-400"></div>
               )}
             </button>
           );

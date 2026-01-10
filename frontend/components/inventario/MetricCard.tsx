@@ -20,12 +20,12 @@ interface MetricCardProps {
 
 const colorStyles = {
   blue: {
-    bg: 'bg-gradient-to-br from-blue-50 to-blue-100/50',
-    iconBg: 'bg-gradient-to-br from-blue-500 to-blue-600',
+    bg: 'bg-gradient-to-br from-red-50 to-red-100/50',
+    iconBg: 'bg-gradient-to-br from-red-500 to-red-600',
     icon: 'text-white',
-    border: 'border-blue-200',
-    shadow: 'shadow-blue-100',
-    hoverShadow: 'hover:shadow-blue-200',
+    border: 'border-red-200',
+    shadow: 'shadow-red-100',
+    hoverShadow: 'hover:shadow-red-200',
   },
   green: {
     bg: 'bg-gradient-to-br from-green-50 to-green-100/50',

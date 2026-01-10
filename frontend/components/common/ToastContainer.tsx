@@ -41,10 +41,10 @@ function getNotificationStyles(type: NotificationType) {
     default:
       return {
         Icon: Info,
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        iconColor: 'text-blue-600',
-        textColor: 'text-blue-900',
+        bgColor: 'bg-red-50',
+        borderColor: 'border-red-200',
+        iconColor: 'text-red-600',
+        textColor: 'text-red-900',
       };
   }
 }

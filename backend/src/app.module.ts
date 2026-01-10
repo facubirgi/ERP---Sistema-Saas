@@ -12,6 +12,7 @@ import { ProductosModule } from './inventario/productos/productos.module';
 import { VentasModule } from './ventas/ventas.module';
 import { TercerosModule } from './ventas/terceros/terceros.module';
 import { CajaModule } from './caja/caja.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -56,6 +57,9 @@ import { AppService } from './app.service';
 
     // Caja Module (Tesorería)
     CajaModule,
+
+    // Analytics Module (Dashboard)
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

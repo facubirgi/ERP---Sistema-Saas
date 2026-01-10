@@ -297,7 +297,7 @@ export function DashboardVentasView({
           </button>
           <button
             onClick={onNavigateToNewVenta}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
           >
             <Plus size={20} />
             Nueva Venta
@@ -350,10 +350,10 @@ export function DashboardVentasView({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
             onClick={onNavigateToNewVenta}
-            className="flex items-center justify-between p-5 border-2 border-blue-200 rounded-xl hover:border-blue-500 bg-linear-to-r from-blue-50 to-blue-100/30 hover:from-blue-100 hover:to-blue-200/50 transition-all duration-300 group shadow-sm hover:shadow-lg hover:scale-[1.02]"
+            className="flex items-center justify-between p-5 border-2 border-red-200 rounded-xl hover:border-red-500 bg-linear-to-r from-red-50 to-red-100/30 hover:from-red-100 hover:to-red-200/50 transition-all duration-300 group shadow-sm hover:shadow-lg hover:scale-[1.02]"
           >
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+              <div className="w-12 h-12 bg-linear-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
                 <Plus className="text-white" size={22} />
               </div>
               <div className="text-left">
@@ -361,7 +361,7 @@ export function DashboardVentasView({
                 <p className="text-sm text-gray-600">Registrar una venta</p>
               </div>
             </div>
-            <ArrowRight className="text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-300" size={22} />
+            <ArrowRight className="text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-300" size={22} />
           </button>
 
           <button
@@ -388,7 +388,7 @@ export function DashboardVentasView({
           <h3 className="text-lg font-bold text-gray-900">Ventas Recientes</h3>
           <button
             onClick={() => onNavigateToTab('ventas')}
-            className="text-sm text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 hover:gap-2 transition-all duration-200 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg"
+            className="text-sm text-red-600 hover:text-red-700 font-semibold flex items-center gap-1 hover:gap-2 transition-all duration-200 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg"
           >
             Ver todas
             <ArrowRight size={16} />
@@ -400,7 +400,7 @@ export function DashboardVentasView({
             recentVentas.map((venta) => (
               <div
                 key={venta.id}
-                className="flex items-center justify-between p-4 bg-linear-to-r from-gray-50 to-gray-100/50 rounded-lg hover:from-blue-50 hover:to-blue-100/50 border border-gray-200 hover:border-blue-300 transition-all duration-200 hover:shadow-md"
+                className="flex items-center justify-between p-4 bg-linear-to-r from-gray-50 to-gray-100/50 rounded-lg hover:from-red-50 hover:to-red-100/50 border border-gray-200 hover:border-red-300 transition-all duration-200 hover:shadow-md"
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
@@ -451,7 +451,7 @@ export function DashboardVentasView({
           <h3 className="text-lg font-bold text-gray-900">Clientes con Deuda</h3>
           <button
             onClick={() => onNavigateToTab('cuenta-corriente')}
-            className="text-sm text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 hover:gap-2 transition-all duration-200 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg"
+            className="text-sm text-red-600 hover:text-red-700 font-semibold flex items-center gap-1 hover:gap-2 transition-all duration-200 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg"
           >
             Ver cuenta corriente
             <ArrowRight size={16} />

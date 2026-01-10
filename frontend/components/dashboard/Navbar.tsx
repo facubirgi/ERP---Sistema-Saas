@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useCajaContext } from '@/contexts/CajaContext';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { ChevronDown, LogOut, User, Wallet } from 'lucide-react';
 import { useState, memo, useEffect } from 'react';
 import { EstadoCaja } from '@/lib/types/caja.types';
@@ -31,8 +32,19 @@ export const Navbar = memo(function Navbar() {
       <div className="flex items-center justify-between w-full">
         {/* Logo and Company Name */}
         <div className="flex items-center space-x-3">
-          <div className="text-2xl font-bold text-white">
-            ESimple
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-white flex items-center justify-center">
+              <Image
+                src="/logo.jpeg"
+                alt="ESimple Logo"
+                width={36}
+                height={36}
+                className="object-cover"
+              />
+            </div>
+            <div className="text-2xl font-bold text-white">
+              ESimple
+            </div>
           </div>
           <div className="h-6 w-px bg-gray-700"></div>
           <span className="text-sm text-gray-400">{user?.razonSocial}</span>
@@ -70,7 +82,7 @@ export const Navbar = memo(function Navbar() {
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors"
             >
-              <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-linear-to-br from-red-500 to-purple-600 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-semibold">
                   {user?.nombre.charAt(0).toUpperCase()}
                 </span>

@@ -158,11 +158,11 @@ export function ClientesView() {
             return cliente.nombre.toLowerCase().includes(busquedaNombre.toLowerCase());
           }).map((cliente) => {
             const isCliente = cliente.tipo === TipoTercero.CLIENTE;
-            const bgColor = isCliente ? 'from-purple-500 to-purple-600' : 'from-blue-500 to-blue-600';
-            const borderHover = isCliente ? 'hover:border-purple-300' : 'hover:border-blue-300';
+            const bgColor = isCliente ? 'from-purple-500 to-purple-600' : 'from-red-500 to-red-600';
+            const borderHover = isCliente ? 'hover:border-purple-300' : 'hover:border-red-300';
             const Icon = isCliente ? UserCheck : Truck;
             const tipoLabel = isCliente ? 'Cliente' : 'Proveedor';
-            const badgeBg = isCliente ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
+            const badgeBg = isCliente ? 'bg-purple-100 text-purple-700' : 'bg-red-100 text-red-700';
 
             return (
               <div

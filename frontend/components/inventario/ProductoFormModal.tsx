@@ -44,9 +44,9 @@ export function ProductoFormModal({
         <Modal isOpen={isOpen} onClose={onClose} title={title} size="lg">
             <div className="space-y-6">
                 {/* Información Básica */}
-                <div className="bg-linear-to-br from-blue-50 to-blue-100/30 p-5 rounded-xl border border-blue-200">
+                <div className="bg-linear-to-br from-red-50 to-red-100/30 p-5 rounded-xl border border-red-200">
                     <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                        <span className="w-2 h-2 bg-red-600 rounded-full"></span>
                         Información Básica
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
@@ -58,7 +58,7 @@ export function ProductoFormModal({
                                 type="text"
                                 value={formData.nombre}
                                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-gray-900 placeholder:text-gray-400 font-medium transition-all duration-200 shadow-sm"
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-red-100 focus:border-red-500 text-gray-900 placeholder:text-gray-400 font-medium transition-all duration-200 shadow-sm"
                                 placeholder="Ej: Coca Cola 2L"
                                 maxLength={200}
                             />
@@ -72,7 +72,7 @@ export function ProductoFormModal({
                                 type="text"
                                 value={formData.codigoBarras}
                                 onChange={(e) => setFormData({ ...formData, codigoBarras: e.target.value })}
-                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-gray-900 placeholder:text-gray-400 font-mono transition-all duration-200 shadow-sm"
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-red-100 focus:border-red-500 text-gray-900 placeholder:text-gray-400 font-mono transition-all duration-200 shadow-sm"
                                 placeholder="Opcional"
                                 maxLength={50}
                             />
@@ -85,7 +85,7 @@ export function ProductoFormModal({
                             <select
                                 value={formData.categoriaId}
                                 onChange={(e) => setFormData({ ...formData, categoriaId: e.target.value })}
-                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 text-gray-900 font-medium transition-all duration-200 shadow-sm"
+                                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-red-100 focus:border-red-500 text-gray-900 font-medium transition-all duration-200 shadow-sm"
                             >
                                 <option value="">Seleccionar...</option>
                                 {categorias.map((cat) => (
@@ -260,7 +260,7 @@ export function ProductoFormModal({
                     <button
                         onClick={onSubmit}
                         disabled={isSubmitting}
-                        className="px-6 py-3 bg-linear-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                        className="px-6 py-3 bg-linear-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:from-red-700 hover:to-red-800 disabled:opacity-50 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                     >
                         {isSubmitting ? 'Guardando...' : title.includes('Nuevo') ? 'Crear Producto' : 'Guardar Cambios'}
                     </button>

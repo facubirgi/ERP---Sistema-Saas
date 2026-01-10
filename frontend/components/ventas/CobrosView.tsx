@@ -30,7 +30,7 @@ export function CobrosView() {
 
           <div className="grid grid-cols-1 gap-4 text-left bg-gray-50 p-6 rounded-lg">
             <div className="flex items-start gap-3">
-              <Receipt className="text-blue-600 mt-1 shrink-0" size={20} />
+              <Receipt className="text-red-600 mt-1 shrink-0" size={20} />
               <div>
                 <p className="font-semibold text-gray-900">Cobros parciales</p>
                 <p className="text-sm text-gray-600">Permite registrar pagos parciales hasta completar el saldo</p>

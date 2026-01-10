@@ -58,7 +58,7 @@ export function CarritoList({
               <button
                 type="button"
                 onClick={() => onActualizarCantidad(item.productoId, item.cantidad - 1)}
-                className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500"
                 disabled={item.cantidad <= 1}
                 title="Disminuir cantidad"
                 aria-label={`Disminuir cantidad de ${item.nombre}`}
@@ -83,14 +83,14 @@ export function CarritoList({
                 }}
                 min="1"
                 max={item.stockDisponible}
-                className="w-16 text-center border border-gray-300 rounded px-2 py-1.5 text-gray-900 font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-16 text-center border border-gray-300 rounded px-2 py-1.5 text-gray-900 font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 aria-label={`Cantidad de ${item.nombre}`}
               />
 
               <button
                 type="button"
                 onClick={() => onActualizarCantidad(item.productoId, item.cantidad + 1)}
-                className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500"
                 disabled={item.cantidad >= item.stockDisponible}
                 title="Aumentar cantidad"
                 aria-label={`Aumentar cantidad de ${item.nombre}`}
@@ -119,10 +119,10 @@ export function CarritoList({
       </div>
 
       {/* Total */}
-      <div className="bg-blue-50 px-4 py-4 border-t-2 border-blue-200">
+      <div className="bg-red-50 px-4 py-4 border-t-2 border-red-200">
         <div className="flex items-center justify-between">
           <span className="text-lg font-semibold text-gray-900">Total:</span>
-          <span className="text-2xl font-bold text-blue-600">{formatCurrency(total)}</span>
+          <span className="text-2xl font-bold text-red-600">{formatCurrency(total)}</span>
         </div>
       </div>
     </div>

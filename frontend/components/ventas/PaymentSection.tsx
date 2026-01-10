@@ -50,7 +50,7 @@ export function PaymentSection({
               max="9999999.99"
               value={montoPagado}
               onChange={(e) => onMontoPagadoChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
               placeholder="0.00"
               aria-describedby={error ? 'payment-error' : undefined}
             />
@@ -77,7 +77,7 @@ export function PaymentSection({
               id="metodo-pago"
               value={metodoPago}
               onChange={(e) => onMetodoPagoChange(e.target.value as MetodoPago)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 appearance-none cursor-pointer"
               style={{ color: '#000000', fontWeight: '500' }}
             >
               <option value={MetodoPago.EFECTIVO} style={{ color: '#000000', backgroundColor: '#ffffff', fontWeight: '500' }}>Efectivo</option>

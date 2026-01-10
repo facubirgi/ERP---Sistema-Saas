@@ -305,7 +305,7 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
 
             {/* Resumen del Pago */}
             {formData.monto && !isNaN(parseFloat(formData.monto)) && (
-              <div className={`rounded-lg p-4 ${pagoCompleto ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'}`}>
+              <div className={`rounded-lg p-4 ${pagoCompleto ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-700 font-medium">Saldo Actual:</span>
@@ -321,10 +321,10 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
                   </div>
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between">
-                      <span className={`text-sm font-bold ${pagoCompleto ? 'text-green-700' : 'text-blue-700'}`}>
+                      <span className={`text-sm font-bold ${pagoCompleto ? 'text-green-700' : 'text-red-700'}`}>
                         Saldo Restante:
                       </span>
-                      <span className={`text-lg font-bold ${pagoCompleto ? 'text-green-700' : 'text-blue-700'}`}>
+                      <span className={`text-lg font-bold ${pagoCompleto ? 'text-green-700' : 'text-red-700'}`}>
                         ${saldoRestante.toFixed(2)}
                       </span>
                     </div>

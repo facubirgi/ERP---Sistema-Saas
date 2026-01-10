@@ -8,3 +8,4 @@ export { TercerosApi } from './terceros.api';
 export { CobrosApi } from './cobros.api';
 export { CajaApi } from './caja.api';
 export { CotizacionesApi } from './cotizaciones.api';
+export { AnalyticsApi } from './analytics.api';

@@ -57,7 +57,7 @@ export function CategoriasTable({
         <div className="flex items-center justify-end gap-2">
           <button
             onClick={() => onEdit(cat)}
-            className="p-2 text-blue-600 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-all duration-200 hover:scale-110"
+            className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
             title="Editar"
           >
             <Edit size={18} />
