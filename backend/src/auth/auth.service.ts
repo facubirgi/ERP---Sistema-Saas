@@ -69,6 +69,53 @@ export class AuthService {
   }
 
   /**
+   * Validate session from JWT payload
+   */
+  async validateSession(jwtPayload: JwtPayload) {
+    try {
+      // Get empresa
+      const empresa = await this.tenantService.findEmpresaById(
+        jwtPayload.empresaId,
+      );
+
+      if (!empresa) {
+        throw new UnauthorizedException('Empresa no encontrada');
+      }
+
+      // Get usuario (sub contains the userId)
+      const usuario = await this.tenantService.findUsuarioById(
+        jwtPayload.sub,
+        jwtPayload.empresaId,
+      );
+
+      if (!usuario) {
+        throw new UnauthorizedException('Usuario no encontrado');
+      }
+
+      if (!usuario.activo) {
+        throw new UnauthorizedException('Usuario inactivo');
+      }
+
+      return {
+        valid: true,
+        usuario: {
+          id: usuario.id,
+          email: usuario.email,
+          nombre: usuario.nombre,
+          rol: usuario.rol,
+          empresaId: usuario.empresaId,
+        },
+        empresa: {
+          id: empresa.id,
+          razonSocial: empresa.razonSocial,
+        },
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Sesión inválida');
+    }
+  }
+
+  /**
    * Login usuario
    */
   async login(loginDto: LoginDto) {

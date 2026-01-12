@@ -31,4 +31,24 @@ export class AuthApi extends BaseApiClient {
   static async logout(): Promise<{ message: string }> {
     return this.post<{ message: string }>('/auth/logout', {});
   }
+
+  /**
+   * Validate current session - checks if JWT token is valid
+   */
+  static async validateSession(): Promise<{
+    valid: boolean;
+    usuario: {
+      id: number;
+      email: string;
+      nombre: string;
+      rol: string;
+      empresaId: number;
+    };
+    empresa: {
+      id: number;
+      razonSocial: string;
+    };
+  }> {
+    return this.get('/auth/validate');
+  }
 }

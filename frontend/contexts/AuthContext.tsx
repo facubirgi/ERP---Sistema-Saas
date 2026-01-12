@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { AuthApi } from '@/lib/api';
+import { AuthApi, BaseApiClient } from '@/lib/api';
 import {
   AuthUser,
   LoginDto,
@@ -11,6 +11,7 @@ import {
   UsuarioRol,
 } from '@/lib/types/auth.types';
 import { ApiError } from '@/lib/types/common.types';
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -31,26 +32,64 @@ const USER_KEY = 'auth_user';
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  // Load auth state from localStorage on mount
-  // Note: JWT token is now in httpOnly cookie (secure, XSS-resistant)
+  // Handle 401 unauthorized - clear session and redirect to login
+  const handleUnauthorized = useCallback(() => {
+    setUser(null);
+    localStorage.removeItem(USER_KEY);
+    router.push('/login');
+  }, [router]);
+
+  // Set up global 401 handler
   useEffect(() => {
-    const storedUser = localStorage.getItem(USER_KEY);
+    BaseApiClient.setUnauthorizedHandler(handleUnauthorized);
+  }, [handleUnauthorized]);
 
-    if (storedUser) {
+  // Validate session on mount - check if JWT token is still valid
+  useEffect(() => {
+    const validateSession = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
+        // First check if there's stored user data
+        const storedUser = localStorage.getItem(USER_KEY);
+        
+        if (!storedUser) {
+          setLoading(false);
+          return;
+        }
+
+        // Validate session with backend to check if JWT token is still valid
+        const sessionData = await AuthApi.validateSession();
+        
+        if (sessionData.valid) {
+          const authUser: AuthUser = {
+            userId: sessionData.usuario.id,
+            email: sessionData.usuario.email,
+            empresaId: sessionData.usuario.empresaId,
+            rol: sessionData.usuario.rol as UsuarioRol,
+            nombre: sessionData.usuario.nombre,
+            razonSocial: sessionData.empresa.razonSocial,
+          };
+          
+          setUser(authUser);
+          // Update localStorage with fresh data
+          localStorage.setItem(USER_KEY, JSON.stringify(authUser));
+        } else {
+          // Session is invalid, clear storage
+          localStorage.removeItem(USER_KEY);
+        }
       } catch (error) {
-        // Error al parsear usuario almacenado, limpiar datos corruptos
+        // If validation fails (401, network error, etc), clear session
         if (process.env.NODE_ENV === 'development') {
-          console.error('Error parsing stored user:', error);
+          console.error('Session validation failed:', error);
         }
         localStorage.removeItem(USER_KEY);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
-    setLoading(false);
+    validateSession();
   }, []);
 
   const login = useCallback(async (data: LoginDto) => {

@@ -2,7 +2,18 @@ import { ApiError } from '../types/common.types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
+// Global handler for 401 errors
+let unauthorizedHandler: (() => void) | null = null;
+
 export class BaseApiClient {
+  /**
+   * Set global handler for 401 Unauthorized errors
+   * This will be called whenever any API request receives a 401 response
+   */
+  static setUnauthorizedHandler(handler: () => void) {
+    unauthorizedHandler = handler;
+  }
+
   protected static getHeaders(): HeadersInit {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -22,6 +33,11 @@ export class BaseApiClient {
         statusCode: response.status,
         error: error.error,
       };
+
+      // Call unauthorized handler if 401 response
+      if (response.status === 401 && unauthorizedHandler) {
+        unauthorizedHandler();
+      }
 
       throw apiError;
     }

@@ -183,6 +183,15 @@ export class TenantService {
   }
 
   /**
+   * Find empresa by id
+   */
+  async findEmpresaById(id: string): Promise<Empresa | null> {
+    return this.empresaRepository.findOne({
+      where: { id },
+    });
+  }
+
+  /**
    * Verify password
    */
   async verifyPassword(

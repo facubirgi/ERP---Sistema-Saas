@@ -5,13 +5,17 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  Get,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -151,5 +155,40 @@ export class AuthController {
     });
 
     return { message: 'Logout exitoso' };
+  }
+
+  @Get('validate')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Validar sesión actual',
+    description: 'Verifica si el token JWT en la cookie es válido y retorna información del usuario',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sesión válida',
+    schema: {
+      example: {
+        valid: true,
+        usuario: {
+          id: 1,
+          email: 'juan@kiosco.com',
+          nombre: 'Juan Pérez',
+          rol: 'DUEÑO',
+          empresaId: 1,
+        },
+        empresa: {
+          id: 1,
+          razonSocial: 'Kiosco El Buen Precio',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token inválido o expirado',
+  })
+  async validate(@Request() req) {
+    return this.authService.validateSession(req.user);
   }
 }
