@@ -4,11 +4,14 @@
 // COBRO FORM MODAL - Formulario para Registrar Cobros de Deudas
 // ============================================================================
 
-import { useState, useEffect } from 'react';
-import { X, DollarSign, CreditCard, AlertCircle, User, FileText } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { X, DollarSign, CreditCard, AlertCircle, User, FileText, Printer, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
 import { useVentas } from '@/contexts/VentasContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { MetodoPago, type VentaListItemDto, type RegistrarCobroDto } from '@/lib/types/ventas.types';
 import { validateAmount } from '@/lib/utils/validation.utils';
+import { formatCurrency } from '@/lib/utils/format.utils';
 
 interface CobroFormModalProps {
   isOpen: boolean;
@@ -29,6 +32,10 @@ interface FormErrors {
 
 export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormModalProps) {
   const { registrarCobro, loading, error } = useVentas();
+  const { addNotification } = useNotifications();
+
+  // Ref para el comprobante
+  const comprobanteRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState<FormData>({
     monto: '',
@@ -141,6 +148,181 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
     const montoNum = parseFloat(formData.monto);
     if (isNaN(montoNum)) return venta.saldoPendiente;
     return Math.max(0, venta.saldoPendiente - montoNum);
+  };
+
+  // ============================================================================
+  // FUNCIONES DE IMPRESIÓN Y PDF
+  // ============================================================================
+
+  const handleImprimirComprobante = useCallback(() => {
+    if (!comprobanteRef.current) return;
+
+    try {
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        console.error('No se pudo abrir la ventana de impresión');
+        return;
+      }
+
+      const content = comprobanteRef.current.innerHTML;
+
+      printWindow.document.write('<!DOCTYPE html>');
+      printWindow.document.write('<html><head>');
+      printWindow.document.write('<meta charset="utf-8">');
+      printWindow.document.write('<title>Comprobante de Cobro</title>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write(content);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.focus();
+
+      setTimeout(() => {
+        try {
+          printWindow.print();
+          printWindow.close();
+        } catch (err) {
+          console.error('Error al imprimir:', err);
+        }
+      }, 250);
+    } catch (error) {
+      console.error('Error en handleImprimirComprobante:', error);
+    }
+  }, []);
+
+  const handleDescargarPDF = useCallback(() => {
+    if (!venta) return;
+
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 20;
+      let yPosition = margin;
+      const montoNum = parseFloat(formData.monto) || 0;
+
+      // Título
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('COMPROBANTE DE COBRO', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
+
+      // Nombre de la empresa
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Sistema SaaS', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
+
+      // Línea separadora
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Fecha
+      const fecha = new Date();
+      const fechaFormateada = fecha.toLocaleString('es-AR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+      doc.setFontSize(10);
+      doc.text(`Fecha: ${fechaFormateada}`, margin, yPosition);
+      yPosition += 6;
+
+      // Cliente
+      doc.text(`Cliente: ${venta.tercero?.nombre || 'Venta Anónima'}`, margin, yPosition);
+      yPosition += 10;
+
+      // Línea separadora
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Información de la venta
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DETALLE DEL COBRO', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total de la Venta: ${formatCurrency(venta.total)}`, margin, yPosition);
+      yPosition += 6;
+
+      doc.text(`Saldo Anterior: ${formatCurrency(venta.saldoPendiente)}`, margin, yPosition);
+      yPosition += 6;
+
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Monto Cobrado: ${formatCurrency(montoNum)}`, margin, yPosition);
+      yPosition += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Método de Pago: ${getMetodoPagoLabel(formData.metodoPago)}`, margin, yPosition);
+      yPosition += 10;
+
+      // Línea separadora
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Saldo restante
+      const saldoRestante = calcularSaldoRestante();
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Saldo Restante: ${formatCurrency(saldoRestante)}`, margin, yPosition);
+      yPosition += 10;
+
+      if (saldoRestante === 0) {
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'italic');
+        doc.text('✓ Deuda totalmente saldada', margin, yPosition);
+        yPosition += 10;
+      }
+
+      // Línea separadora
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Pie de página
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'italic');
+      doc.text('¡Gracias por su pago!', pageWidth / 2, yPosition, { align: 'center' });
+
+      // Guardar el PDF
+      const fechaArchivo = new Date().toISOString().split('T')[0];
+      doc.save(`comprobante_cobro_${fechaArchivo}.pdf`);
+
+      addNotification({
+        type: 'success',
+        title: 'PDF Generado',
+        message: 'El comprobante se ha descargado correctamente',
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'No se pudo generar el PDF',
+        duration: 5000,
+      });
+    }
+  }, [venta, formData.monto, formData.metodoPago, addNotification, calcularSaldoRestante]);
+
+  // Función helper para etiquetas de método de pago
+  const getMetodoPagoLabel = (metodo: MetodoPago): string => {
+    const labels = {
+      [MetodoPago.EFECTIVO]: 'Efectivo',
+      [MetodoPago.QR]: 'QR',
+      [MetodoPago.TARJETA]: 'Tarjeta',
+      [MetodoPago.TRANSFERENCIA]: 'Transferencia',
+    };
+    return labels[metodo];
   };
 
   // ============================================================================
@@ -339,34 +521,140 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
             )}
 
             {/* Botones */}
-            <div className="flex gap-3 pt-4">
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={isSubmitting}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting || loading}
-                className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Registrando...</span>
-                  </>
-                ) : (
-                  <>
-                    <DollarSign size={20} />
-                    <span>Registrar Cobro</span>
-                  </>
-                )}
-              </button>
+            <div className="space-y-3 pt-4">
+              {/* Botones de impresión (solo si pago completo) */}
+              {pagoCompleto && formData.monto && !isNaN(parseFloat(formData.monto)) && (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleImprimirComprobante}
+                    disabled={isSubmitting}
+                    className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                    aria-label="Imprimir comprobante"
+                  >
+                    <Printer size={16} />
+                    <span>Imprimir</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDescargarPDF}
+                    disabled={isSubmitting}
+                    className="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                    aria-label="Descargar PDF"
+                  >
+                    <Download size={16} />
+                    <span>PDF</span>
+                  </button>
+                </div>
+              )}
+              
+              {/* Botones principales */}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || loading}
+                  className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Registrando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <DollarSign size={20} />
+                      <span>Registrar Cobro</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </form>
+
+          {/* Comprobante (oculto, solo para impresión) */}
+          <div ref={comprobanteRef} style={{ display: 'none' }}>
+            <div style={{ fontFamily: 'Arial, sans-serif', padding: '20mm', maxWidth: '210mm', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>
+                  COMPROBANTE DE COBRO
+                </h1>
+                <p style={{ fontSize: '14px', margin: '0', color: '#666' }}>Sistema SaaS</p>
+              </div>
+
+              <div style={{ borderTop: '2px solid #000', borderBottom: '2px solid #000', padding: '10px 0', marginBottom: '20px' }}>
+                <p style={{ margin: '5px 0', fontSize: '12px' }}>
+                  <strong>Fecha:</strong> {new Date().toLocaleString('es-AR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                  })}
+                </p>
+                <p style={{ margin: '5px 0', fontSize: '12px' }}>
+                  <strong>Cliente:</strong> {venta?.tercero?.nombre || 'Venta Anónima'}
+                </p>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px' }}>DETALLE DEL COBRO</h2>
+                <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Total de la Venta:</td>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'right', fontWeight: 'bold' }}>
+                        {formatCurrency(venta?.total || 0)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Saldo Anterior:</td>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'right' }}>
+                        {formatCurrency(venta?.saldoPendiente || 0)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Monto Cobrado:</td>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'right', fontWeight: 'bold', color: '#16a34a' }}>
+                        {formatCurrency(parseFloat(formData.monto) || 0)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>Método de Pago:</td>
+                      <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'right' }}>
+                        {getMetodoPagoLabel(formData.metodoPago)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '12px 8px', borderBottom: '2px solid #000', fontWeight: 'bold', fontSize: '14px' }}>
+                        Saldo Restante:
+                      </td>
+                      <td style={{ padding: '12px 8px', borderBottom: '2px solid #000', textAlign: 'right', fontWeight: 'bold', fontSize: '16px', color: calcularSaldoRestante() === 0 ? '#16a34a' : '#dc2626' }}>
+                        {formatCurrency(calcularSaldoRestante())}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                {calcularSaldoRestante() === 0 && (
+                  <p style={{ textAlign: 'center', marginTop: '10px', fontSize: '13px', fontWeight: 'bold', color: '#16a34a' }}>
+                    ✓ Deuda totalmente saldada
+                  </p>
+                )}
+              </div>
+
+              <div style={{ borderTop: '2px solid #000', paddingTop: '15px', textAlign: 'center' }}>
+                <p style={{ fontSize: '14px', fontStyle: 'italic', margin: '0' }}>¡Gracias por su pago!</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

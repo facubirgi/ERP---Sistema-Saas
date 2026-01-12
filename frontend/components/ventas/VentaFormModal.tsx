@@ -5,8 +5,9 @@
 // ============================================================================
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { X, ShoppingCart, AlertCircle, Printer } from 'lucide-react';
+import { X, ShoppingCart, AlertCircle, Printer, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import jsPDF from 'jspdf';
 import { useVentas } from '@/contexts/VentasContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCaja } from '@/hooks/useCaja';
@@ -158,16 +159,16 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
 
   const handleImprimirComprobante = useCallback(() => {
     if (!comprobanteRef.current) return;
-    
+
     try {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
         console.error('No se pudo abrir la ventana de impresión');
         return;
       }
-      
+
       const content = comprobanteRef.current.innerHTML;
-      
+
       printWindow.document.write('<!DOCTYPE html>');
       printWindow.document.write('<html><head>');
       printWindow.document.write('<meta charset="utf-8">');
@@ -191,6 +192,139 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
     }
   }, []);
 
+  const handleDescargarPDF = useCallback(() => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 20;
+      const contentWidth = pageWidth - 2 * margin;
+      let yPosition = margin;
+
+      // Título
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('COMPROBANTE DE VENTA', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
+
+      // Nombre de la empresa
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Sistema SaaS', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
+
+      // Línea separadora
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Fecha
+      const fecha = new Date();
+      const fechaFormateada = fecha.toLocaleString('es-AR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+      doc.setFontSize(10);
+      doc.text(`Fecha: ${fechaFormateada}`, margin, yPosition);
+      yPosition += 6;
+
+      // Cliente
+      doc.text(`Cliente: ${clienteNombre}`, margin, yPosition);
+      yPosition += 10;
+
+      // Línea separadora
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Detalle de productos
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DETALLE DE PRODUCTOS', margin, yPosition);
+      yPosition += 8;
+
+      // Items
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      carrito.forEach((item) => {
+        // Nombre del producto
+        doc.setFont('helvetica', 'bold');
+        doc.text(item.nombre, margin, yPosition);
+        yPosition += 5;
+
+        // Detalles del producto
+        doc.setFont('helvetica', 'normal');
+        const detalleTexto = `Cant: ${item.cantidad}    P/U: ${formatCurrency(item.precioUnitario)}    Subtotal: ${formatCurrency(item.subtotal)}`;
+        doc.text(detalleTexto, margin + 5, yPosition);
+        yPosition += 8;
+      });
+
+      // Línea separadora antes de totales
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Total
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`TOTAL: ${formatCurrency(total)}`, margin, yPosition);
+      yPosition += 6;
+
+      // Monto pagado
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Monto Pagado: ${formatCurrency(parseFloat(montoPagado) || 0)}`, margin, yPosition);
+      yPosition += 6;
+
+      // Método de pago
+      if (parseFloat(montoPagado) > 0 && metodoPago) {
+        const metodoPagoLabel = {
+          [MetodoPago.EFECTIVO]: 'Efectivo',
+          [MetodoPago.QR]: 'QR',
+          [MetodoPago.TARJETA]: 'Tarjeta',
+          [MetodoPago.TRANSFERENCIA]: 'Transferencia',
+        };
+        doc.text(`Método de Pago: ${metodoPagoLabel[metodoPago]}`, margin, yPosition);
+        yPosition += 10;
+      }
+
+      // Línea separadora
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Pie de página
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'italic');
+      doc.text('¡Gracias por su compra!', pageWidth / 2, yPosition, { align: 'center' });
+
+      // Guardar el PDF
+      const fechaArchivo = new Date().toISOString().split('T')[0];
+      doc.save(`comprobante_venta_${fechaArchivo}.pdf`);
+
+      addNotification({
+        type: 'success',
+        title: 'PDF Generado',
+        message: 'El comprobante se ha descargado correctamente',
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'No se pudo generar el PDF',
+        duration: 5000,
+      });
+    }
+  }, [carrito, clienteNombre, total, montoPagado, metodoPago, formatCurrency, addNotification]);
+
   // ============================================================================
   // VALIDACIONES
   // ============================================================================
@@ -206,18 +340,29 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
 
     // Validar monto pagado
     const pagadoValidation = validateAmount(montoPagado);
+    const pagado = pagadoValidation.value || 0;
     
     if (montoPagado && montoPagado !== '0') {
       if (!pagadoValidation.isValid) {
         errors.pago = pagadoValidation.error;
-      } else if (pagadoValidation.value! > 0 && !metodoPago) {
+      } else if (pagado > 0 && !metodoPago) {
         errors.pago = 'Debes seleccionar un método de pago';
       }
     }
 
+    // Validar venta anónima: debe pagarse completa
+    if (!clienteId && pagado < total && pagado !== 0) {
+      errors.pago = 'Las ventas anónimas deben pagarse completas. Selecciona un cliente para permitir pagos parciales o a crédito.';
+    }
+
+    // Validar que el monto pagado no supere el total
+    if (pagado > total) {
+      errors.pago = 'El monto pagado no puede ser mayor al total de la venta';
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [carrito, montoPagado, metodoPago]);
+  }, [carrito, montoPagado, metodoPago, clienteId, total]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -415,16 +560,28 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
                 Cancelar
               </button>
               {puedeImprimir && (
-                <button
-                  type="button"
-                  onClick={handleImprimirComprobante}
-                  disabled={isSubmitting}
-                  className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center gap-2"
-                  aria-label="Imprimir comprobante"
-                >
-                  <Printer size={20} />
-                  Imprimir Comprobante
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={handleImprimirComprobante}
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center gap-2"
+                    aria-label="Imprimir comprobante"
+                  >
+                    <Printer size={20} />
+                    Imprimir Comprobante
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDescargarPDF}
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center gap-2"
+                    aria-label="Descargar PDF"
+                  >
+                    <Download size={20} />
+                    Descargar PDF
+                  </button>
+                </>
               )}
               <button
                 type="submit"
