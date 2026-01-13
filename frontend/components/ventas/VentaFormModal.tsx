@@ -41,7 +41,7 @@ interface FormErrors {
 }
 
 export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { crearVenta, fetchTerceros, loading } = useVentas();
   const { sesion } = useCaja();
   const { addNotification } = useNotifications();
@@ -214,7 +214,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
       // Nombre de la empresa
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
-      doc.text('Sistema SaaS', pageWidth / 2, yPosition, { align: 'center' });
+      doc.text(user?.razonSocial || 'Mi Empresa', pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 10;
 
       // Línea separadora
@@ -250,41 +250,75 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
       doc.text('DETALLE DE PRODUCTOS', margin, yPosition);
       yPosition += 8;
 
-      // Items
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      carrito.forEach((item) => {
-        // Nombre del producto
-        doc.setFont('helvetica', 'bold');
-        doc.text(item.nombre, margin, yPosition);
-        yPosition += 5;
+      // Encabezado de tabla
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('#', margin, yPosition);
+      doc.text('Producto', margin + 8, yPosition);
+      doc.text('Cant.', margin + 90, yPosition);
+      doc.text('P/U', margin + 110, yPosition);
+      doc.text('Subtotal', pageWidth - margin - 30, yPosition);
+      yPosition += 4;
+      
+      // Línea bajo encabezado
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
 
-        // Detalles del producto
-        doc.setFont('helvetica', 'normal');
-        const detalleTexto = `Cant: ${item.cantidad}    P/U: ${formatCurrency(item.precioUnitario)}    Subtotal: ${formatCurrency(item.subtotal)}`;
-        doc.text(detalleTexto, margin + 5, yPosition);
-        yPosition += 8;
+      // Items
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      carrito.forEach((item, index) => {
+        // Número
+        doc.text(`${index + 1}`, margin + 2, yPosition);
+        
+        // Nombre del producto (truncado si es muy largo)
+        const nombreMaxLength = 35;
+        const nombreTruncado = item.nombre.length > nombreMaxLength 
+          ? item.nombre.substring(0, nombreMaxLength) + '...' 
+          : item.nombre;
+        doc.text(nombreTruncado, margin + 8, yPosition);
+        
+        // Cantidad
+        doc.text(`${item.cantidad}`, margin + 90, yPosition);
+        
+        // Precio unitario
+        doc.text(formatCurrency(item.precioUnitario), margin + 110, yPosition);
+        
+        // Subtotal (alineado a la derecha)
+        doc.text(formatCurrency(item.subtotal), pageWidth - margin - 5, yPosition, { align: 'right' });
+        
+        yPosition += 6;
       });
 
       // Línea separadora antes de totales
+      yPosition += 2;
       doc.setLineWidth(0.5);
       doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Total items
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+      doc.text(`Total Items: ${totalItems} unidades`, margin, yPosition);
       yPosition += 8;
 
       // Total
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
       doc.text(`TOTAL: ${formatCurrency(total)}`, margin, yPosition);
-      yPosition += 6;
+      yPosition += 8;
 
       // Monto pagado
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Monto Pagado: ${formatCurrency(parseFloat(montoPagado) || 0)}`, margin, yPosition);
+      const montoPagadoNum = parseFloat(montoPagado) || 0;
+      doc.text(`Monto Pagado: ${formatCurrency(montoPagadoNum)}`, margin, yPosition);
       yPosition += 6;
 
       // Método de pago
-      if (parseFloat(montoPagado) > 0 && metodoPago) {
+      if (montoPagadoNum > 0 && metodoPago) {
         const metodoPagoLabel = {
           [MetodoPago.EFECTIVO]: 'Efectivo',
           [MetodoPago.QR]: 'QR',
@@ -292,7 +326,22 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
           [MetodoPago.TRANSFERENCIA]: 'Transferencia',
         };
         doc.text(`Método de Pago: ${metodoPagoLabel[metodoPago]}`, margin, yPosition);
-        yPosition += 10;
+        yPosition += 6;
+      }
+
+      // Vuelto o Saldo pendiente
+      if (montoPagadoNum > total) {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(5, 150, 105); // Verde
+        doc.text(`Vuelto: ${formatCurrency(montoPagadoNum - total)}`, margin, yPosition);
+        doc.setTextColor(0, 0, 0); // Reset color
+        yPosition += 8;
+      } else if (montoPagadoNum < total) {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(220, 38, 38); // Rojo
+        doc.text(`Saldo Pendiente: ${formatCurrency(total - montoPagadoNum)}`, margin, yPosition);
+        doc.setTextColor(0, 0, 0); // Reset color
+        yPosition += 8;
       }
 
       // Línea separadora

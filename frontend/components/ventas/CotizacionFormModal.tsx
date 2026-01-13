@@ -626,6 +626,7 @@ export function CotizacionFormModal({ isOpen, onClose, onSuccess, cotizacionId }
               ? cotizacionCompleta.usuarioEmisor
               : user?.nombre || 'Sistema'
           }
+          empresaNombre={user?.razonSocial || 'Mi Empresa'}
           formatCurrency={formatCurrency}
         />
       )}

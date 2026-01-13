@@ -102,34 +102,52 @@ export const generarPDFCotizacion = (data: CotizacionPDFData): void => {
   agregarLinea();
 
   // TABLA DE ITEMS - ENCABEZADO
-  agregarTexto('DETALLE', margen, 9, 'bold');
+  agregarTexto('DETALLE DE PRODUCTOS', margen, 9, 'bold');
   y += 1;
 
   // ITEMS
-  data.items.forEach((item) => {
+  data.items.forEach((item, index) => {
+    // Número del item
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`#${index + 1}`, margen, y);
+    
     // Nombre del producto
     pdf.setFontSize(9);
     pdf.setFont('helvetica', 'normal');
 
     // Dividir nombre largo en múltiples líneas si es necesario
-    const maxAncho = anchoUtil;
+    const maxAncho = anchoUtil - 5;
     const lineasNombre = pdf.splitTextToSize(item.nombreProducto, maxAncho);
 
     lineasNombre.forEach((linea: string) => {
-      pdf.text(linea, margen, y);
+      pdf.text(linea, margen + 5, y);
       y += 4;
     });
 
-    // Cantidad x Precio = Subtotal
-    const detalleLinea = `${item.cantidad} x ${formatearMonto(item.precioUnitario)} = ${formatearMonto(item.subtotal)}`;
+    // Cantidad y Precio unitario
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(8);
-    pdf.text(detalleLinea, margen + 2, y);
-    y += 5;
+    pdf.text(`Cant: ${item.cantidad}`, margen + 5, y);
+    pdf.text(`P/U: ${formatearMonto(item.precioUnitario)}`, margen + 25, y);
+    y += 4;
+    
+    // Subtotal
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Subtotal:', margen + 5, y);
+    pdf.text(formatearMonto(item.subtotal), margen + anchoUtil, y, { align: 'right' });
+    y += 6;
   });
 
   y += 1;
   agregarLinea();
+
+  // Total de items
+  pdf.setFontSize(9);
+  pdf.setFont('helvetica', 'normal');
+  const totalItems = data.items.reduce((sum, item) => sum + item.cantidad, 0);
+  pdf.text(`Total Items: ${totalItems} unidades`, margen, y);
+  y += 6;
 
   // TOTAL
   pdf.setFontSize(12);

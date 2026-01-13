@@ -8,6 +8,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, DollarSign, CreditCard, AlertCircle, User, FileText, Printer, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { useVentas } from '@/contexts/VentasContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { MetodoPago, type VentaListItemDto, type RegistrarCobroDto } from '@/lib/types/ventas.types';
 import { validateAmount } from '@/lib/utils/validation.utils';
@@ -32,6 +33,7 @@ interface FormErrors {
 
 export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormModalProps) {
   const { registrarCobro, loading, error } = useVentas();
+  const { user } = useAuth();
   const { addNotification } = useNotifications();
 
   // Ref para el comprobante
@@ -213,7 +215,7 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
       // Nombre de la empresa
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
-      doc.text('Sistema SaaS', pageWidth / 2, yPosition, { align: 'center' });
+      doc.text(user?.razonSocial || 'Mi Empresa', pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 10;
 
       // Línea separadora
@@ -586,7 +588,7 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
                 <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>
                   COMPROBANTE DE COBRO
                 </h1>
-                <p style={{ fontSize: '14px', margin: '0', color: '#666' }}>Sistema SaaS</p>
+                <p style={{ fontSize: '14px', margin: '0', color: '#666' }}>{user?.razonSocial || 'Mi Empresa'}</p>
               </div>
 
               <div style={{ borderTop: '2px solid #000', borderBottom: '2px solid #000', padding: '10px 0', marginBottom: '20px' }}>

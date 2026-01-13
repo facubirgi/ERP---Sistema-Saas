@@ -15,11 +15,12 @@ interface ComprobanteVentaProps {
   montoPagado: number;
   metodoPago?: MetodoPago;
   fecha?: Date;
+  empresaNombre?: string;
   formatCurrency: (value: number) => string;
 }
 
 export const ComprobanteVenta = forwardRef<HTMLDivElement, ComprobanteVentaProps>(
-  ({ clienteNombre, items, total, montoPagado, metodoPago, fecha = new Date(), formatCurrency }, ref) => {
+  ({ clienteNombre, items, total, montoPagado, metodoPago, fecha = new Date(), empresaNombre = 'Mi Empresa', formatCurrency }, ref) => {
     const formatearFecha = (fecha: Date) => {
       return fecha.toLocaleString('es-AR', {
         year: 'numeric',
@@ -139,7 +140,7 @@ export const ComprobanteVenta = forwardRef<HTMLDivElement, ComprobanteVentaProps
 
         <div className="comprobante-header">
           <div className="comprobante-title">COMPROBANTE DE VENTA</div>
-          <div style={{ fontSize: '9pt' }}>Sistema SaaS</div>
+          <div style={{ fontSize: '9pt' }}>{empresaNombre}</div>
         </div>
 
         <div className="comprobante-info">
@@ -159,17 +160,27 @@ export const ComprobanteVenta = forwardRef<HTMLDivElement, ComprobanteVentaProps
           </div>
           {items.map((item, index) => (
             <div key={index} className="comprobante-item">
-              <div className="comprobante-item-name">{item.nombre}</div>
+              <div className="comprobante-item-name">
+                <span style={{ marginRight: '5px', color: '#666' }}>#{index + 1}</span>
+                {item.nombre}
+              </div>
               <div className="comprobante-item-detail">
                 <span>Cant: {item.cantidad}</span>
                 <span>P/U: {formatCurrency(item.precioUnitario)}</span>
-                <span>Subtotal: {formatCurrency(item.subtotal)}</span>
+              </div>
+              <div className="comprobante-item-detail" style={{ fontWeight: 'bold', marginTop: '2px' }}>
+                <span>Subtotal:</span>
+                <span>{formatCurrency(item.subtotal)}</span>
               </div>
             </div>
           ))}
         </div>
 
         <div className="comprobante-totals">
+          <div className="comprobante-total-line" style={{ fontSize: '10pt' }}>
+            <span>Total Items:</span>
+            <span>{items.reduce((sum, item) => sum + item.cantidad, 0)} unidades</span>
+          </div>
           <div className="comprobante-total-line final">
             <span>TOTAL:</span>
             <span>{formatCurrency(total)}</span>
@@ -182,6 +193,18 @@ export const ComprobanteVenta = forwardRef<HTMLDivElement, ComprobanteVentaProps
             <div className="comprobante-total-line">
               <span>Método de Pago:</span>
               <span>{metodoPagoLabel[metodoPago]}</span>
+            </div>
+          )}
+          {montoPagado > total && (
+            <div className="comprobante-total-line" style={{ color: '#059669', fontWeight: 'bold' }}>
+              <span>Vuelto:</span>
+              <span>{formatCurrency(montoPagado - total)}</span>
+            </div>
+          )}
+          {montoPagado < total && (
+            <div className="comprobante-total-line" style={{ color: '#dc2626', fontWeight: 'bold' }}>
+              <span>Saldo Pendiente:</span>
+              <span>{formatCurrency(total - montoPagado)}</span>
             </div>
           )}
         </div>

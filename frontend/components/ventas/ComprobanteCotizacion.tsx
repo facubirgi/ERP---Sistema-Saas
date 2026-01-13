@@ -15,6 +15,7 @@ interface ComprobanteCotizacionProps {
   fechaEmision: Date;
   fechaVencimiento: Date;
   usuarioEmisor?: string;
+  empresaNombre?: string;
   formatCurrency: (value: number) => string;
 }
 
@@ -27,6 +28,7 @@ export const ComprobanteCotizacion = forwardRef<HTMLDivElement, ComprobanteCotiz
     fechaEmision,
     fechaVencimiento,
     usuarioEmisor,
+    empresaNombre = 'Mi Empresa',
     formatCurrency
   }, ref) => {
     const formatearFecha = (fecha: Date) => {
@@ -151,7 +153,7 @@ export const ComprobanteCotizacion = forwardRef<HTMLDivElement, ComprobanteCotiz
         <div className="comprobante-header">
           <div className="comprobante-title">COTIZACIÓN</div>
           <div className="comprobante-numero">{numeroCotizacion}</div>
-          <div style={{ fontSize: '9pt', marginTop: '5px' }}>Sistema SaaS</div>
+          <div style={{ fontSize: '9pt', marginTop: '5px' }}>{empresaNombre}</div>
         </div>
 
         <div className="comprobante-info">
@@ -181,17 +183,27 @@ export const ComprobanteCotizacion = forwardRef<HTMLDivElement, ComprobanteCotiz
           </div>
           {items.map((item, index) => (
             <div key={index} className="comprobante-item">
-              <div className="comprobante-item-name">{item.nombre}</div>
+              <div className="comprobante-item-name">
+                <span style={{ marginRight: '5px', color: '#666' }}>#{index + 1}</span>
+                {item.nombre}
+              </div>
               <div className="comprobante-item-detail">
                 <span>Cant: {item.cantidad}</span>
                 <span>P/U: {formatCurrency(item.precioUnitario)}</span>
-                <span>Subtotal: {formatCurrency(item.subtotal)}</span>
+              </div>
+              <div className="comprobante-item-detail" style={{ fontWeight: 'bold', marginTop: '2px' }}>
+                <span>Subtotal:</span>
+                <span>{formatCurrency(item.subtotal)}</span>
               </div>
             </div>
           ))}
         </div>
 
         <div className="comprobante-totals">
+          <div className="comprobante-total-line" style={{ fontSize: '10pt' }}>
+            <span>Total Items:</span>
+            <span>{items.reduce((sum, item) => sum + item.cantidad, 0)} unidades</span>
+          </div>
           <div className="comprobante-total-line final">
             <span>TOTAL:</span>
             <span>{formatCurrency(total)}</span>
