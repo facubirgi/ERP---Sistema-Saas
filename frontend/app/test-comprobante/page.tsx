@@ -27,6 +27,7 @@ export default function TestComprobantePage() {
       nombre: 'Laptop HP Pavilion 15.6" Intel Core i7 16GB RAM',
       cantidad: 2,
       precioUnitario: 5500.00,
+      descuentoPorcentaje: 0,
       subtotal: 11000.00,
       stock: 10,
       stockDisponible: 10
@@ -37,6 +38,7 @@ export default function TestComprobantePage() {
       nombre: 'Mouse Inalámbrico Logitech M185',
       cantidad: 5,
       precioUnitario: 45.50,
+      descuentoPorcentaje: 0,
       subtotal: 227.50,
       stock: 50,
       stockDisponible: 50
@@ -47,6 +49,7 @@ export default function TestComprobantePage() {
       nombre: 'Teclado Mecánico RGB Gamer',
       cantidad: 1,
       precioUnitario: 320.00,
+      descuentoPorcentaje: 0,
       subtotal: 320.00,
       stock: 15,
       stockDisponible: 15

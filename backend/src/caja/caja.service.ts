@@ -275,7 +275,7 @@ export class CajaService extends TenantBaseService<CajaSesion> {
         empresaId: this.empresaId,
       },
       order: {
-        fecha: 'ASC',
+        fecha: 'DESC',
       },
     });
   }

@@ -7,6 +7,7 @@ export interface CarritoItem {
   nombre: string;
   cantidad: number;
   precioUnitario: number;
+  descuentoPorcentaje: number;
   subtotal: number;
   stockDisponible: number;
 }
@@ -23,6 +24,7 @@ interface UseCarritoReturn {
   carrito: CarritoItem[];
   agregarProducto: (producto: Producto) => { success: boolean; mensaje?: string };
   actualizarCantidad: (productoId: string, cantidad: number) => void;
+  actualizarDescuento: (productoId: string, descuentoPorcentaje: number) => void;
   eliminarProducto: (productoId: string) => void;
   limpiarCarrito: () => void;
   calcularTotal: () => number;
@@ -56,7 +58,7 @@ export function useCarrito(): UseCarritoReturn {
             ? {
                 ...item,
                 cantidad: item.cantidad + 1,
-                subtotal: Number(((item.cantidad + 1) * item.precioUnitario).toFixed(2)),
+                subtotal: Number(((item.cantidad + 1) * item.precioUnitario * (1 - item.descuentoPorcentaje / 100)).toFixed(2)),
               }
             : item
         );
@@ -76,6 +78,7 @@ export function useCarrito(): UseCarritoReturn {
           nombre: producto.nombre,
           cantidad: 1,
           precioUnitario: producto.precioVenta,
+          descuentoPorcentaje: 0,
           subtotal: producto.precioVenta,
           stockDisponible: producto.stockActual,
         };
@@ -97,14 +100,29 @@ export function useCarrito(): UseCarritoReturn {
           return {
             ...item,
             cantidad,
-            subtotal: Number((cantidad * item.precioUnitario).toFixed(2)),
+            subtotal: Number((cantidad * item.precioUnitario * (1 - item.descuentoPorcentaje / 100)).toFixed(2)),
           };
         }
         return item;
       })
     );
   }, []);
-
+  const actualizarDescuento = useCallback((productoId: string, descuentoPorcentaje: number) => {
+    setCarrito((prevCarrito) =>
+      prevCarrito.map((item) => {
+        if (item.productoId === productoId) {
+          // Validar y limitar descuento entre 0 y 100
+          const descuento = Math.max(0, Math.min(100, descuentoPorcentaje));
+          return {
+            ...item,
+            descuentoPorcentaje: descuento,
+            subtotal: Number((item.cantidad * item.precioUnitario * (1 - descuento / 100)).toFixed(2)),
+          };
+        }
+        return item;
+      })
+    );
+  }, []);
   const eliminarProducto = useCallback((productoId: string) => {
     setCarrito((prevCarrito) => prevCarrito.filter((item) => item.productoId !== productoId));
   }, []);
@@ -118,27 +136,36 @@ export function useCarrito(): UseCarritoReturn {
   }, [carrito]);
 
   const obtenerItems = useCallback((): ItemVentaDto[] => {
-    return carrito.map((item) => ({
-      productoId: item.productoId,
-      cantidad: item.cantidad,
-      precioUnitario: item.precioUnitario,
-    }));
+    return carrito.map((item) => {
+      // Aplicar descuento al precio unitario para que el backend valide correctamente
+      const precioConDescuento = Number((item.precioUnitario * (1 - item.descuentoPorcentaje / 100)).toFixed(2));
+      return {
+        productoId: item.productoId,
+        cantidad: item.cantidad,
+        precioUnitario: precioConDescuento,
+      };
+    });
   }, [carrito]);
 
   const obtenerItemsCotizacion = useCallback((): ItemCotizacion[] => {
-    return carrito.map((item) => ({
-      productoId: item.productoId,
-      nombreProducto: item.nombre,
-      cantidad: item.cantidad,
-      precioUnitario: item.precioUnitario,
-      subtotal: item.subtotal,
-    }));
+    return carrito.map((item) => {
+      // Aplicar descuento al precio unitario para que el backend valide correctamente
+      const precioConDescuento = Number((item.precioUnitario * (1 - item.descuentoPorcentaje / 100)).toFixed(2));
+      return {
+        productoId: item.productoId,
+        nombreProducto: item.nombre,
+        cantidad: item.cantidad,
+        precioUnitario: precioConDescuento,
+        subtotal: item.subtotal,
+      };
+    });
   }, [carrito]);
 
   return {
     carrito,
     agregarProducto,
     actualizarCantidad,
+    actualizarDescuento,
     eliminarProducto,
     limpiarCarrito,
     calcularTotal,

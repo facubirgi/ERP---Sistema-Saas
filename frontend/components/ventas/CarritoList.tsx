@@ -1,9 +1,10 @@
-import { Plus, Minus, Trash2, Package } from 'lucide-react';
+import { Plus, Minus, Trash2, Package, Percent } from 'lucide-react';
 import type { CarritoItem } from '@/hooks/useCarrito';
 
 interface CarritoListProps {
   items: CarritoItem[];
   onActualizarCantidad: (productoId: string, cantidad: number) => void;
+  onActualizarDescuento: (productoId: string, descuento: number) => void;
   onEliminar: (productoId: string) => void;
   formatCurrency: (value: number) => string;
   total: number;
@@ -12,6 +13,7 @@ interface CarritoListProps {
 export function CarritoList({
   items,
   onActualizarCantidad,
+  onActualizarDescuento,
   onEliminar,
   formatCurrency,
   total,
@@ -31,89 +33,133 @@ export function CarritoList({
       </div>
 
       {/* Items List */}
-      <div className="divide-y divide-gray-200 max-h-64 overflow-y-auto">
+      <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
         {items.map((item) => (
           <div
             key={item.productoId}
-            className="px-4 py-3 flex items-center gap-4 hover:bg-gray-50 transition-colors"
+            className="px-4 py-3 hover:bg-gray-50 transition-colors"
           >
-            {/* Product Info */}
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">{item.nombre}</p>
-              <div className="flex items-center gap-2 text-sm text-gray-700 font-medium">
-                <span>{formatCurrency(item.precioUnitario)} c/u</span>
-                <span aria-hidden="true">•</span>
-                <span
-                  className={
-                    item.stockDisponible <= 5 ? 'text-orange-600 font-semibold' : ''
-                  }
+            <div className="flex items-start gap-4">
+              {/* Product Info */}
+              <div className="flex-1">
+                <p className="font-medium text-gray-900">{item.nombre}</p>
+                <div className="flex items-center gap-2 text-sm text-gray-700 font-medium">
+                  <span>{formatCurrency(item.precioUnitario)} c/u</span>
+                  <span aria-hidden="true">•</span>
+                  <span
+                    className={
+                      item.stockDisponible <= 5 ? 'text-orange-600 font-semibold' : ''
+                    }
+                  >
+                    Stock: {item.stockDisponible}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quantity Controls */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onActualizarCantidad(item.productoId, item.cantidad - 1)}
+                  className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500"
+                  disabled={item.cantidad <= 1}
+                  title="Disminuir cantidad"
+                  aria-label={`Disminuir cantidad de ${item.nombre}`}
                 >
-                  Stock: {item.stockDisponible}
-                </span>
+                  <Minus size={16} className="stroke-current" />
+                </button>
+
+                <input
+                  type="number"
+                  value={item.cantidad}
+                  onChange={(e) => {
+                    const valor = parseInt(e.target.value);
+                    if (!isNaN(valor)) {
+                      onActualizarCantidad(item.productoId, valor);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const valor = parseInt(e.target.value);
+                    if (isNaN(valor) || valor < 1) {
+                      onActualizarCantidad(item.productoId, 1);
+                    }
+                  }}
+                  min="1"
+                  max={item.stockDisponible}
+                  className="w-16 text-center border border-gray-300 rounded px-2 py-1.5 text-gray-900 font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  aria-label={`Cantidad de ${item.nombre}`}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => onActualizarCantidad(item.productoId, item.cantidad + 1)}
+                  className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500"
+                  disabled={item.cantidad >= item.stockDisponible}
+                  title="Aumentar cantidad"
+                  aria-label={`Aumentar cantidad de ${item.nombre}`}
+                >
+                  <Plus size={16} className="stroke-current" />
+                </button>
+              </div>
+
+              {/* Subtotal */}
+              <div className="text-right min-w-[100px]">
+                <p className="font-bold text-gray-900">{formatCurrency(item.subtotal)}</p>
+              </div>
+
+              {/* Delete Button */}
+              <button
+                type="button"
+                onClick={() => onEliminar(item.productoId)}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+                title="Eliminar producto"
+                aria-label={`Eliminar ${item.nombre} del carrito`}
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+
+            {/* Discount Row */}
+            <div className="mt-2 flex items-center gap-3 pl-0">
+              <div className="flex items-center gap-2 flex-1">
+                <Percent size={16} className="text-green-600" />
+                <label htmlFor={`descuento-${item.productoId}`} className="text-sm font-medium text-gray-700">
+                  Descuento:
+                </label>
+                <div className="relative w-24">
+                  <input
+                    id={`descuento-${item.productoId}`}
+                    type="number"
+                    value={item.descuentoPorcentaje}
+                    onChange={(e) => {
+                      const valor = parseFloat(e.target.value);
+                      if (!isNaN(valor)) {
+                        onActualizarDescuento(item.productoId, valor);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const valor = parseFloat(e.target.value);
+                      if (isNaN(valor) || valor < 0) {
+                        onActualizarDescuento(item.productoId, 0);
+                      } else if (valor > 100) {
+                        onActualizarDescuento(item.productoId, 100);
+                      }
+                    }}
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    className="w-full pl-2 pr-6 py-1.5 text-center border border-gray-300 rounded text-sm text-gray-900 font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    aria-label={`Descuento porcentual para ${item.nombre}`}
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">%</span>
+                </div>
+                {item.descuentoPorcentaje > 0 && (
+                  <span className="text-xs text-green-600 font-semibold">
+                    -{formatCurrency(item.cantidad * item.precioUnitario * (item.descuentoPorcentaje / 100))}
+                  </span>
+                )}
               </div>
             </div>
-
-            {/* Quantity Controls */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => onActualizarCantidad(item.productoId, item.cantidad - 1)}
-                className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500"
-                disabled={item.cantidad <= 1}
-                title="Disminuir cantidad"
-                aria-label={`Disminuir cantidad de ${item.nombre}`}
-              >
-                <Minus size={16} className="stroke-current" />
-              </button>
-
-              <input
-                type="number"
-                value={item.cantidad}
-                onChange={(e) => {
-                  const valor = parseInt(e.target.value);
-                  if (!isNaN(valor)) {
-                    onActualizarCantidad(item.productoId, valor);
-                  }
-                }}
-                onBlur={(e) => {
-                  const valor = parseInt(e.target.value);
-                  if (isNaN(valor) || valor < 1) {
-                    onActualizarCantidad(item.productoId, 1);
-                  }
-                }}
-                min="1"
-                max={item.stockDisponible}
-                className="w-16 text-center border border-gray-300 rounded px-2 py-1.5 text-gray-900 font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                aria-label={`Cantidad de ${item.nombre}`}
-              />
-
-              <button
-                type="button"
-                onClick={() => onActualizarCantidad(item.productoId, item.cantidad + 1)}
-                className="p-1.5 rounded text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500"
-                disabled={item.cantidad >= item.stockDisponible}
-                title="Aumentar cantidad"
-                aria-label={`Aumentar cantidad de ${item.nombre}`}
-              >
-                <Plus size={16} className="stroke-current" />
-              </button>
-            </div>
-
-            {/* Subtotal */}
-            <div className="text-right min-w-[100px]">
-              <p className="font-bold text-gray-900">{formatCurrency(item.subtotal)}</p>
-            </div>
-
-            {/* Delete Button */}
-            <button
-              type="button"
-              onClick={() => onEliminar(item.productoId)}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
-              title="Eliminar producto"
-              aria-label={`Eliminar ${item.nombre} del carrito`}
-            >
-              <Trash2 size={18} />
-            </button>
           </div>
         ))}
       </div>

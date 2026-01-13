@@ -55,6 +55,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
     carrito,
     agregarProducto,
     actualizarCantidad,
+    actualizarDescuento,
     eliminarProducto,
     limpiarCarrito,
     calcularTotal,
@@ -581,6 +582,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
             <CarritoList
               items={carrito}
               onActualizarCantidad={actualizarCantidad}
+              onActualizarDescuento={actualizarDescuento}
               onEliminar={eliminarProducto}
               formatCurrency={formatCurrency}
               total={total}
