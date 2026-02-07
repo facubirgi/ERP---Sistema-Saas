@@ -39,7 +39,6 @@ export const Navbar = memo(function Navbar() {
                 alt="ESimple Logo"
                 width={36}
                 height={36}
-                style={{ width: 'auto', height: 'auto' }}
                 className="object-cover"
               />
             </div>

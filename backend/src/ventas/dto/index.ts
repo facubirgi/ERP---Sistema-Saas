@@ -17,5 +17,3 @@ export {
   ResumenPorMetodoDto,
   SesionInfoDto,
 } from './exportar-cobros-response.dto';
-export { AnularVentaDto } from './anular-venta.dto';
-export { AnularVentaResponseDto } from './anular-venta-response.dto';

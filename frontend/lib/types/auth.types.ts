@@ -8,10 +8,8 @@ export enum UsuarioRol {
 export interface Empresa {
   id: number;
   razonSocial: string;
-  cuit?: string | null;
+  cuit?: string;
   email: string;
-  direccion?: string | null;
-  telefono?: string | null;
   activo: boolean;
 }
 
@@ -69,10 +67,5 @@ export interface AuthUser {
   empresaId: number;
   rol: UsuarioRol;
   nombre: string;
-  // Datos de empresa
   razonSocial: string;
-  empresaCuit?: string | null;
-  empresaDireccion?: string | null;
-  empresaTelefono?: string | null;
-  empresaEmail?: string | null;
 }

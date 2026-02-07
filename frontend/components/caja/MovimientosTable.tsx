@@ -1,19 +1,17 @@
 import React from 'react';
-import { Receipt, XCircle } from 'lucide-react';
+import { Receipt } from 'lucide-react';
 import { Badge } from '@/components/common/Badge';
 import type { MovimientoCaja } from '@/lib/types/caja.types';
 import {
   TIPO_MOVIMIENTO_UI_MAP,
   METODO_PAGO_ICONS,
   METODO_PAGO_LABELS,
-  OrigenMovimiento,
 } from '@/lib/types/caja.types';
 
 interface MovimientosTableProps {
   movimientos: MovimientoCaja[];
   formatearMonto: (monto: number) => string;
   formatearHora: (fecha: string) => string;
-  onAnularVenta?: (movimiento: MovimientoCaja) => void;
 }
 
 /**
@@ -32,20 +30,7 @@ export const MovimientosTable = React.memo(function MovimientosTable({
   movimientos,
   formatearMonto,
   formatearHora,
-  onAnularVenta,
 }: MovimientosTableProps) {
-  // Determina si un movimiento puede ser anulado
-  const puedeAnular = (mov: MovimientoCaja): boolean => {
-    return mov.origen === OrigenMovimiento.VENTA && mov.comprobanteId !== null;
-  };
-
-  // Determina si un movimiento es una devolución (venta anulada)
-  const esDevolucion = (mov: MovimientoCaja): boolean => {
-    return mov.origen === OrigenMovimiento.DEVOLUCION;
-  };
-
-  // Verificar si hay al menos un movimiento que se puede anular
-  const hayMovimientosAnulables = onAnularVenta && movimientos.some(puedeAnular);
   // Estado vacío
   if (movimientos.length === 0) {
     return (
@@ -89,11 +74,6 @@ export const MovimientosTable = React.memo(function MovimientosTable({
               <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Monto
               </th>
-              {hayMovimientosAnulables && (
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Acciones
-                </th>
-              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
@@ -103,43 +83,26 @@ export const MovimientosTable = React.memo(function MovimientosTable({
               const labelMetodo = METODO_PAGO_LABELS[movimiento.metodoPago];
               const badgeVariant =
                 movimiento.tipo === 'INGRESO' ? 'success' : 'danger';
-              const esMovDevolucion = esDevolucion(movimiento);
-              const puedeAnularMov = puedeAnular(movimiento);
 
               return (
                 <tr
                   key={movimiento.id}
-                  className={`hover:bg-gray-50 transition-colors ${
-                    esMovDevolucion ? 'bg-red-50/50' : ''
-                  }`}
+                  className="hover:bg-gray-50 transition-colors"
                 >
                   {/* Hora */}
-                  <td className={`px-4 py-3 whitespace-nowrap text-sm font-medium ${
-                    esMovDevolucion ? 'text-gray-500' : 'text-gray-900'
-                  }`}>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                     {formatearHora(movimiento.fecha)}
                   </td>
 
                   {/* Concepto */}
-                  <td className={`px-4 py-3 text-sm ${
-                    esMovDevolucion ? 'text-gray-500' : 'text-gray-700'
-                  }`}>
+                  <td className="px-4 py-3 text-sm text-gray-700">
                     <div>
-                      <p className={`font-medium ${esMovDevolucion ? 'italic' : ''}`}>
-                        {movimiento.descripcion}
-                      </p>
-                      {esMovDevolucion && (
-                        <span className="text-xs text-red-600 font-medium">
-                          (Anulación)
-                        </span>
-                      )}
+                      <p className="font-medium">{movimiento.descripcion}</p>
                     </div>
                   </td>
 
                   {/* Método */}
-                  <td className={`px-4 py-3 whitespace-nowrap text-sm ${
-                    esMovDevolucion ? 'text-gray-500' : 'text-gray-700'
-                  }`}>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
                     <div className="flex items-center gap-2">
                       <span className="text-lg" aria-hidden="true">
                         {iconoMetodo}
@@ -160,25 +123,6 @@ export const MovimientosTable = React.memo(function MovimientosTable({
                     {movimiento.tipo === 'EGRESO' && '-'}
                     {formatearMonto(movimiento.monto)}
                   </td>
-
-                  {/* Acciones */}
-                  {hayMovimientosAnulables && (
-                    <td className="px-4 py-3 whitespace-nowrap text-center">
-                      {puedeAnularMov && onAnularVenta ? (
-                        <button
-                          type="button"
-                          onClick={() => onAnularVenta(movimiento)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                          title="Anular esta venta"
-                        >
-                          <XCircle size={14} />
-                          Anular
-                        </button>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                  )}
                 </tr>
               );
             })}

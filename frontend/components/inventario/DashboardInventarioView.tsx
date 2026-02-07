@@ -58,11 +58,16 @@ export function DashboardInventarioView({
 
     setIsLoadingData(true);
     try {
+      console.log('[DEBUG] Fetching productos and categorias...');
+
       // Cargar productos y categorías en paralelo
       const [productosResponse, categoriasResponse] = await Promise.all([
         fetchProductos({ page: 1, limit: 100 }), // Cargar todos para métricas
         fetchCategorias({ page: 1, limit: 100 }),
       ]);
+
+      console.log('[DEBUG] Productos response:', productosResponse);
+      console.log('[DEBUG] Categorias response:', categoriasResponse);
 
       if (productosResponse && categoriasResponse) {
         // Guardar productos recientes (primeros 5)
@@ -87,6 +92,7 @@ export function DashboardInventarioView({
           totalCategorias: categoriasResponse.data.length,
         };
 
+        console.log('[DEBUG] Calculated metrics:', metrics);
         setMetricas(metrics);
       }
     } catch (error) {
@@ -122,11 +128,18 @@ export function DashboardInventarioView({
   // Cargar datos cuando el usuario esté autenticado
   useEffect(() => {
     // Esperar a que termine de cargar el AuthContext
-    if (authLoading) return;
+    if (authLoading) {
+      console.log('[DEBUG] Dashboard waiting for auth...');
+      return;
+    }
 
     // Si no está autenticado después de cargar, no intentar cargar datos
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      console.log('[DEBUG] Dashboard: User not authenticated');
+      return;
+    }
 
+    console.log('[DEBUG] Dashboard loading data for authenticated user');
     loadDashboardData();
   }, [isAuthenticated, authLoading, loadDashboardData]);
 

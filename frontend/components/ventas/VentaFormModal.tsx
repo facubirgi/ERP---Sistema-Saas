@@ -79,20 +79,6 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
 
   // Memoizar cálculos
   const total = useMemo(() => calcularTotal(), [calcularTotal]);
-
-  // Calcular subtotal sin descuento y descuento total
-  const { subtotalSinDescuento, descuentoTotal } = useMemo(() => {
-    const subtotal = carrito.reduce(
-      (sum, item) => sum + item.cantidad * item.precioUnitario,
-      0
-    );
-    const descuento = subtotal - total;
-    return {
-      subtotalSinDescuento: Number(subtotal.toFixed(2)),
-      descuentoTotal: Number(descuento.toFixed(2)),
-    };
-  }, [carrito, total]);
-
   const cambio = useMemo(() => {
     const pagado = parseFloat(montoPagado) || 0;
     return Math.max(0, pagado - total);
@@ -173,400 +159,200 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
   }, []);
 
   const handleImprimirComprobante = useCallback(() => {
+    if (!comprobanteRef.current) return;
+
     try {
-      // Usar jsPDF para generar el PDF e imprimirlo directamente
-      // Esto garantiza que el ticket impreso sea idéntico al PDF descargado
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [80, 200],
-      });
-
-      const pageWidth = 80;
-      const margin = 5;
-      let y = 8;
-
-      const metodoPagoLabel: Record<MetodoPago, string> = {
-        [MetodoPago.EFECTIVO]: 'Efectivo',
-        [MetodoPago.QR]: 'QR',
-        [MetodoPago.TARJETA]: 'Tarjeta',
-        [MetodoPago.TRANSFERENCIA]: 'Transferencia',
-      };
-
-      // ========== ENCABEZADO EMPRESA ==========
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.text(user?.razonSocial?.toUpperCase() || 'MI EMPRESA', pageWidth / 2, y, { align: 'center' });
-      y += 5;
-
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      if (user?.empresaDireccion) {
-        doc.text(user.empresaDireccion, pageWidth / 2, y, { align: 'center' });
-        y += 4;
-      }
-      if (user?.empresaTelefono) {
-        doc.text(`Tel: ${user.empresaTelefono}`, pageWidth / 2, y, { align: 'center' });
-        y += 4;
-      }
-      if (user?.empresaEmail) {
-        doc.text(user.empresaEmail, pageWidth / 2, y, { align: 'center' });
-        y += 4;
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        console.error('No se pudo abrir la ventana de impresión');
+        return;
       }
 
-      // Linea separadora
-      doc.setLineWidth(0.3);
-      (doc as any).setLineDash([1, 1], 0);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
+      const content = comprobanteRef.current.innerHTML;
 
-      // ========== NIT ==========
-      if (user?.empresaCuit) {
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`NIT: ${user.empresaCuit}`, pageWidth / 2, y, { align: 'center' });
-        y += 4;
-        doc.line(margin, y, pageWidth - margin, y);
-        y += 4;
-      }
+      printWindow.document.write('<!DOCTYPE html>');
+      printWindow.document.write('<html><head>');
+      printWindow.document.write('<meta charset="utf-8">');
+      printWindow.document.write('<title>Comprobante de Venta</title>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write(content);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.focus();
 
-      // ========== TITULO COMPROBANTE ==========
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text('COMPROBANTE DE VENTA', pageWidth / 2, y, { align: 'center' });
-      y += 5;
-
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      const fecha = new Date();
-      const fechaFormateada = fecha.toLocaleString('es-BO', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      doc.text(`Fecha: ${fechaFormateada}`, pageWidth / 2, y, { align: 'center' });
-      y += 4;
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      // ========== CLIENTE ==========
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Cliente:', margin, y);
-      y += 4;
-      doc.setFont('helvetica', 'normal');
-      doc.text(clienteNombre, margin, y);
-      y += 4;
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      // ========== TABLA DE PRODUCTOS ==========
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Cant.', margin, y);
-      doc.text('Detalle', margin + 12, y);
-      doc.text('Total', pageWidth - margin, y, { align: 'right' });
-      y += 3;
-      (doc as any).setLineDash([]);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      doc.setFont('helvetica', 'normal');
-      carrito.forEach((item) => {
-        doc.text(`${item.cantidad}`, margin + 2, y);
-        const nombreMax = 30;
-        const nombre = item.nombre.length > nombreMax
-          ? item.nombre.substring(0, nombreMax) + '...'
-          : item.nombre;
-        doc.text(nombre, margin + 12, y);
-        doc.text(formatCurrency(item.subtotal), pageWidth - margin, y, { align: 'right' });
-        y += 4;
-      });
-
-      // ========== TOTALES ==========
-      y += 2;
-      (doc as any).setLineDash([1, 1], 0);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      if (descuentoTotal > 0) {
-        doc.setFontSize(8);
-        doc.text('SUBTOTAL', margin, y);
-        doc.text(formatCurrency(subtotalSinDescuento), pageWidth - margin, y, { align: 'right' });
-        y += 4;
-        doc.setTextColor(5, 150, 105);
-        doc.text('DESCUENTO', margin, y);
-        doc.text(`-${formatCurrency(descuentoTotal)}`, pageWidth - margin, y, { align: 'right' });
-        doc.setTextColor(0, 0, 0);
-        y += 4;
-      }
-
-      // TOTAL
-      (doc as any).setLineDash([]);
-      doc.line(margin + 30, y, pageWidth - margin, y);
-      y += 4;
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text('TOTAL', margin, y);
-      doc.text(formatCurrency(total), pageWidth - margin, y, { align: 'right' });
-      y += 5;
-
-      // ========== SECCION PAGO ==========
-      (doc as any).setLineDash([1, 1], 0);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      const montoPagadoNum = parseFloat(montoPagado) || 0;
-
-      if (metodoPago) {
-        doc.text('Metodo de pago:', margin, y);
-        doc.text(metodoPagoLabel[metodoPago], pageWidth - margin, y, { align: 'right' });
-        y += 4;
-      }
-
-      doc.text('Monto pagado:', margin, y);
-      doc.text(formatCurrency(montoPagadoNum), pageWidth - margin, y, { align: 'right' });
-      y += 4;
-
-      if (montoPagadoNum > total) {
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(5, 150, 105);
-        doc.text('Vuelto:', margin, y);
-        doc.text(formatCurrency(montoPagadoNum - total), pageWidth - margin, y, { align: 'right' });
-        doc.setTextColor(0, 0, 0);
-        y += 4;
-      } else if (montoPagadoNum < total) {
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(220, 38, 38);
-        doc.text('Saldo pendiente:', margin, y);
-        doc.text(formatCurrency(total - montoPagadoNum), pageWidth - margin, y, { align: 'right' });
-        doc.setTextColor(0, 0, 0);
-        y += 4;
-      }
-
-      // ========== PIE DE PAGINA ==========
-      y += 2;
-      (doc as any).setLineDash([1, 1], 0);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 5;
-
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Gracias por su compra!', pageWidth / 2, y, { align: 'center' });
-
-      // Abrir diálogo de impresión directamente
-      doc.autoPrint();
-      const pdfBlob = doc.output('blob');
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      const printWindow = window.open(pdfUrl);
-
-      if (printWindow) {
-        printWindow.onafterprint = () => {
-          URL.revokeObjectURL(pdfUrl);
+      setTimeout(() => {
+        try {
+          printWindow.print();
           printWindow.close();
-        };
-      }
+        } catch (err) {
+          console.error('Error al imprimir:', err);
+        }
+      }, 250);
     } catch (error) {
       console.error('Error en handleImprimirComprobante:', error);
-      addNotification({
-        type: 'error',
-        title: 'Error',
-        message: 'No se pudo imprimir el comprobante',
-        duration: 5000,
-      });
     }
-  }, [carrito, clienteNombre, total, subtotalSinDescuento, descuentoTotal, montoPagado, metodoPago, user, addNotification]);
+  }, []);
 
   const handleDescargarPDF = useCallback(() => {
     try {
-      // Formato ticket 80mm (aproximadamente 226 puntos)
       const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: [80, 200], // Ancho 80mm, alto variable
+        format: 'a4',
       });
 
-      const pageWidth = 80;
-      const margin = 5;
-      let y = 8;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 20;
+      const contentWidth = pageWidth - 2 * margin;
+      let yPosition = margin;
 
-      const metodoPagoLabel: Record<MetodoPago, string> = {
-        [MetodoPago.EFECTIVO]: 'Efectivo',
-        [MetodoPago.QR]: 'QR',
-        [MetodoPago.TARJETA]: 'Tarjeta',
-        [MetodoPago.TRANSFERENCIA]: 'Transferencia',
-      };
-
-      // ========== ENCABEZADO EMPRESA ==========
-      doc.setFontSize(11);
+      // Título
+      doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.text(user?.razonSocial?.toUpperCase() || 'MI EMPRESA', pageWidth / 2, y, { align: 'center' });
-      y += 5;
+      doc.text('COMPROBANTE DE VENTA', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
 
-      doc.setFontSize(8);
+      // Nombre de la empresa
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
-      if (user?.empresaDireccion) {
-        doc.text(user.empresaDireccion, pageWidth / 2, y, { align: 'center' });
-        y += 4;
-      }
-      if (user?.empresaTelefono) {
-        doc.text(`Tel: ${user.empresaTelefono}`, pageWidth / 2, y, { align: 'center' });
-        y += 4;
-      }
-      if (user?.empresaEmail) {
-        doc.text(user.empresaEmail, pageWidth / 2, y, { align: 'center' });
-        y += 4;
-      }
+      doc.text(user?.razonSocial || 'Mi Empresa', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
 
-      // Linea separadora
-      doc.setLineWidth(0.3);
-      (doc as any).setLineDash([1, 1], 0);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
+      // Línea separadora
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
 
-      // ========== NIT ==========
-      if (user?.empresaCuit) {
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`NIT: ${user.empresaCuit}`, pageWidth / 2, y, { align: 'center' });
-        y += 4;
-        doc.line(margin, y, pageWidth - margin, y);
-        y += 4;
-      }
-
-      // ========== TITULO COMPROBANTE ==========
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text('COMPROBANTE DE VENTA', pageWidth / 2, y, { align: 'center' });
-      y += 5;
-
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
+      // Fecha
       const fecha = new Date();
-      const fechaFormateada = fecha.toLocaleString('es-BO', {
-        day: '2-digit',
-        month: '2-digit',
+      const fechaFormateada = fecha.toLocaleString('es-AR', {
         year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
+        second: '2-digit',
       });
-      doc.text(`Fecha: ${fechaFormateada}`, pageWidth / 2, y, { align: 'center' });
-      y += 4;
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      // ========== CLIENTE ==========
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Cliente:', margin, y);
-      y += 4;
-      doc.setFont('helvetica', 'normal');
-      doc.text(clienteNombre, margin, y);
-      y += 4;
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      // ========== TABLA DE PRODUCTOS ==========
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Cant.', margin, y);
-      doc.text('Detalle', margin + 12, y);
-      doc.text('Total', pageWidth - margin, y, { align: 'right' });
-      y += 3;
-      (doc as any).setLineDash([]);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      doc.setFont('helvetica', 'normal');
-      carrito.forEach((item) => {
-        doc.text(`${item.cantidad}`, margin + 2, y);
-        // Truncar nombre si es muy largo
-        const nombreMax = 30;
-        const nombre = item.nombre.length > nombreMax
-          ? item.nombre.substring(0, nombreMax) + '...'
-          : item.nombre;
-        doc.text(nombre, margin + 12, y);
-        doc.text(formatCurrency(item.subtotal), pageWidth - margin, y, { align: 'right' });
-        y += 4;
-      });
-
-      // ========== TOTALES ==========
-      y += 2;
-      (doc as any).setLineDash([1, 1], 0);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      // Si hay descuento, mostrar subtotal y descuento
-      if (descuentoTotal > 0) {
-        doc.setFontSize(8);
-        doc.text('SUBTOTAL', margin, y);
-        doc.text(formatCurrency(subtotalSinDescuento), pageWidth - margin, y, { align: 'right' });
-        y += 4;
-        doc.setTextColor(5, 150, 105);
-        doc.text('DESCUENTO', margin, y);
-        doc.text(`-${formatCurrency(descuentoTotal)}`, pageWidth - margin, y, { align: 'right' });
-        doc.setTextColor(0, 0, 0);
-        y += 4;
-      }
-
-      // TOTAL
-      (doc as any).setLineDash([]);
-      doc.line(margin + 30, y, pageWidth - margin, y);
-      y += 4;
       doc.setFontSize(10);
+      doc.text(`Fecha: ${fechaFormateada}`, margin, yPosition);
+      yPosition += 6;
+
+      // Cliente
+      doc.text(`Cliente: ${clienteNombre}`, margin, yPosition);
+      yPosition += 10;
+
+      // Línea separadora
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Detalle de productos
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text('TOTAL', margin, y);
-      doc.text(formatCurrency(total), pageWidth - margin, y, { align: 'right' });
-      y += 5;
+      doc.text('DETALLE DE PRODUCTOS', margin, yPosition);
+      yPosition += 8;
 
-      // ========== SECCION PAGO ==========
-      (doc as any).setLineDash([1, 1], 0);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 4;
-
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      const montoPagadoNum = parseFloat(montoPagado) || 0;
-
-      if (metodoPago) {
-        doc.text('Metodo de pago:', margin, y);
-        doc.text(metodoPagoLabel[metodoPago], pageWidth - margin, y, { align: 'right' });
-        y += 4;
-      }
-
-      doc.text('Monto pagado:', margin, y);
-      doc.text(formatCurrency(montoPagadoNum), pageWidth - margin, y, { align: 'right' });
-      y += 4;
-
-      if (montoPagadoNum > total) {
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(5, 150, 105);
-        doc.text('Vuelto:', margin, y);
-        doc.text(formatCurrency(montoPagadoNum - total), pageWidth - margin, y, { align: 'right' });
-        doc.setTextColor(0, 0, 0);
-        y += 4;
-      } else if (montoPagadoNum < total) {
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(220, 38, 38);
-        doc.text('Saldo pendiente:', margin, y);
-        doc.text(formatCurrency(total - montoPagadoNum), pageWidth - margin, y, { align: 'right' });
-        doc.setTextColor(0, 0, 0);
-        y += 4;
-      }
-
-      // ========== PIE DE PAGINA ==========
-      y += 2;
-      (doc as any).setLineDash([1, 1], 0);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 5;
-
+      // Encabezado de tabla
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.text('Gracias por su compra!', pageWidth / 2, y, { align: 'center' });
+      doc.text('#', margin, yPosition);
+      doc.text('Producto', margin + 8, yPosition);
+      doc.text('Cant.', margin + 90, yPosition);
+      doc.text('P/U', margin + 110, yPosition);
+      doc.text('Subtotal', pageWidth - margin - 30, yPosition);
+      yPosition += 4;
+      
+      // Línea bajo encabezado
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 5;
+
+      // Items
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      carrito.forEach((item, index) => {
+        // Número
+        doc.text(`${index + 1}`, margin + 2, yPosition);
+        
+        // Nombre del producto (truncado si es muy largo)
+        const nombreMaxLength = 35;
+        const nombreTruncado = item.nombre.length > nombreMaxLength 
+          ? item.nombre.substring(0, nombreMaxLength) + '...' 
+          : item.nombre;
+        doc.text(nombreTruncado, margin + 8, yPosition);
+        
+        // Cantidad
+        doc.text(`${item.cantidad}`, margin + 90, yPosition);
+        
+        // Precio unitario
+        doc.text(formatCurrency(item.precioUnitario), margin + 110, yPosition);
+        
+        // Subtotal (alineado a la derecha)
+        doc.text(formatCurrency(item.subtotal), pageWidth - margin - 5, yPosition, { align: 'right' });
+        
+        yPosition += 6;
+      });
+
+      // Línea separadora antes de totales
+      yPosition += 2;
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Total items
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+      doc.text(`Total Items: ${totalItems} unidades`, margin, yPosition);
+      yPosition += 8;
+
+      // Total
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`TOTAL: ${formatCurrency(total)}`, margin, yPosition);
+      yPosition += 8;
+
+      // Monto pagado
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const montoPagadoNum = parseFloat(montoPagado) || 0;
+      doc.text(`Monto Pagado: ${formatCurrency(montoPagadoNum)}`, margin, yPosition);
+      yPosition += 6;
+
+      // Método de pago
+      if (montoPagadoNum > 0 && metodoPago) {
+        const metodoPagoLabel = {
+          [MetodoPago.EFECTIVO]: 'Efectivo',
+          [MetodoPago.QR]: 'QR',
+          [MetodoPago.TARJETA]: 'Tarjeta',
+          [MetodoPago.TRANSFERENCIA]: 'Transferencia',
+        };
+        doc.text(`Método de Pago: ${metodoPagoLabel[metodoPago]}`, margin, yPosition);
+        yPosition += 6;
+      }
+
+      // Vuelto o Saldo pendiente
+      if (montoPagadoNum > total) {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(5, 150, 105); // Verde
+        doc.text(`Vuelto: ${formatCurrency(montoPagadoNum - total)}`, margin, yPosition);
+        doc.setTextColor(0, 0, 0); // Reset color
+        yPosition += 8;
+      } else if (montoPagadoNum < total) {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(220, 38, 38); // Rojo
+        doc.text(`Saldo Pendiente: ${formatCurrency(total - montoPagadoNum)}`, margin, yPosition);
+        doc.setTextColor(0, 0, 0); // Reset color
+        yPosition += 8;
+      }
+
+      // Línea separadora
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+
+      // Pie de página
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'italic');
+      doc.text('¡Gracias por su compra!', pageWidth / 2, yPosition, { align: 'center' });
 
       // Guardar el PDF
       const fechaArchivo = new Date().toISOString().split('T')[0];
@@ -587,7 +373,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
         duration: 5000,
       });
     }
-  }, [carrito, clienteNombre, total, subtotalSinDescuento, descuentoTotal, montoPagado, metodoPago, user, addNotification]);
+  }, [carrito, clienteNombre, total, montoPagado, metodoPago, formatCurrency, addNotification]);
 
   // ============================================================================
   // VALIDACIONES
@@ -872,20 +658,9 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
           {/* Comprobante (oculto, solo para impresión) */}
           <ComprobanteVenta
             ref={comprobanteRef}
-            // Datos de empresa
-            empresaNombre={user?.razonSocial || 'Mi Empresa'}
-            empresaDireccion={user?.empresaDireccion}
-            empresaTelefono={user?.empresaTelefono}
-            empresaEmail={user?.empresaEmail}
-            empresaNit={user?.empresaCuit}
-            // Datos del cliente
             clienteNombre={clienteNombre}
-            // Items y totales
             items={carrito}
-            subtotal={subtotalSinDescuento}
-            descuentoTotal={descuentoTotal}
             total={total}
-            // Pago
             montoPagado={parseFloat(montoPagado) || 0}
             metodoPago={parseFloat(montoPagado) > 0 ? metodoPago : undefined}
             formatCurrency={formatCurrency}

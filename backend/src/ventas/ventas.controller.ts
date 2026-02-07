@@ -35,8 +35,6 @@ import {
   ListarVentasQueryDto,
   VentaListItemDto,
   ExportarCobrosResponseDto,
-  AnularVentaDto,
-  AnularVentaResponseDto,
 } from './dto';
 
 /**
@@ -367,61 +365,6 @@ export class VentasController {
     @Request() req: RequestWithUser,
   ): Promise<DeudaClienteDto[]> {
     return this.ventasService.getDeudasCliente(clienteId, req.user.empresaId);
-  }
-
-  /**
-   * POST /ventas/:id/anular
-   *
-   * Anula una venta existente de la sesión de caja actual.
-   *
-   * Operaciones atómicas:
-   * - Soft delete del comprobante
-   * - Revertir stock de productos
-   * - Crear movimiento EGRESO/DEVOLUCION en caja
-   * - Ajustar saldo del cliente si aplica
-   *
-   * Validaciones:
-   * - El comprobante debe existir y no estar eliminado
-   * - Debe ser tipo VENTA (no cotización)
-   * - Debe haber una sesión de caja abierta
-   * - El motivo de anulación es obligatorio (mín 10 caracteres)
-   *
-   * @param id ID del comprobante a anular
-   * @param dto Datos de anulación (motivo y sesionCajaId)
-   * @param req Request object con datos del usuario autenticado
-   * @returns Respuesta con información de la anulación
-   */
-  @Post(':id/anular')
-  @ApiOperation({
-    summary: 'Anular una venta',
-    description:
-      'Anula una venta existente, revierte el stock, crea movimiento de devolución en caja y ajusta saldo del cliente si aplica.',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Venta anulada exitosamente',
-    type: AnularVentaResponseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'No hay caja abierta o validación fallida',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Comprobante no encontrado o ya fue anulado',
-  })
-  async anularVenta(
-    @Param('id') id: string,
-    @Body() dto: AnularVentaDto,
-    @Query('sesionCajaId') sesionCajaId: string,
-    @Request() req: RequestWithUser,
-  ): Promise<AnularVentaResponseDto> {
-    return this.ventasService.anularVenta(
-      id,
-      dto,
-      req.user.empresaId,
-      sesionCajaId,
-    );
   }
 
   /**

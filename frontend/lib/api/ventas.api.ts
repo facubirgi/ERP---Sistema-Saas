@@ -14,8 +14,6 @@ import type {
   ActualizarComprobanteDto,
   DeudaClienteDto,
   ExportarCobrosResponseDto,
-  AnularVentaDto,
-  AnularVentaResponseDto,
 } from '@/lib/types/ventas.types';
 
 /**
@@ -161,29 +159,5 @@ export class VentasApi extends BaseApiClient {
    */
   static async exportarCobros(): Promise<ExportarCobrosResponseDto> {
     return this.get<ExportarCobrosResponseDto>(`${this.BASE_PATH}/cobros/export`);
-  }
-
-  /**
-   * Anular una venta
-   * POST /api/ventas/:id/anular
-   *
-   * Requisitos:
-   * - La venta debe existir y no estar eliminada
-   * - La venta debe pertenecer a la sesión de caja actual
-   * - Motivo de anulación mínimo 10 caracteres
-   *
-   * Operaciones atómicas:
-   * - Soft delete del comprobante
-   * - Reversión del stock de cada producto
-   * - Creación de movimiento EGRESO/DEVOLUCION en caja
-   * - Ajuste del saldo del cliente (si aplica)
-   *
-   * @param id - UUID del comprobante a anular
-   * @param data - Datos de anulación (motivo)
-   * @returns Respuesta con detalles de la anulación
-   * @note Auth: JWT en cookie httpOnly (automático)
-   */
-  static async anularVenta(id: string, data: AnularVentaDto): Promise<AnularVentaResponseDto> {
-    return this.post<AnularVentaResponseDto>(`${this.BASE_PATH}/${id}/anular`, data);
   }
 }

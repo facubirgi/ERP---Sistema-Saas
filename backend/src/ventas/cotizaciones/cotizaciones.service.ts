@@ -4,7 +4,6 @@ import {
   BadRequestException,
   Inject,
   forwardRef,
-  Scope,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -25,7 +24,7 @@ import {
   GenerarVentaDesdeCotizacionDto,
 } from './dto';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class CotizacionesService {
   constructor(
     @InjectRepository(Comprobante)

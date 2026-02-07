@@ -3,7 +3,6 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
-  Scope,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -37,8 +36,6 @@ import {
   ResumenCobrosDto,
   ResumenPorMetodoDto,
   SesionInfoDto,
-  AnularVentaDto,
-  AnularVentaResponseDto,
 } from './dto';
 import { CajaService } from '../caja/caja.service';
 import { TipoMovimiento, OrigenMovimiento } from '../caja/enums';
@@ -56,7 +53,7 @@ import { mapearMetodoPagoACaja } from './utils/mapeo-caja.util';
  * - Garantizar integridad transaccional
  * - Registrar automáticamente movimientos de caja por cada cobro
  */
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class VentasService {
   private readonly logger = new Logger(VentasService.name);
 
@@ -166,13 +163,8 @@ export class VentasService {
         estadoPago = EstadoPago.PENDIENTE;
       }
 
-      // C.1 Generar número de comprobante correlativo
-      const numeroComprobante =
-        await this.generarNumeroComprobanteVenta(empresaId);
-
       const comprobante = comprobanteRepo.create({
         tipo: TipoComprobante.VENTA,
-        numeroComprobante,
         total: totalRedondeado,
         saldoPendiente: saldoPendienteRedondeado,
         estadoPago,
@@ -238,22 +230,8 @@ export class VentasService {
         });
 
         await cobroRepo.save(cobro);
-      }
 
-      // H. Si hay clienteId y saldoPendiente > 0, actualizar saldoActual del Tercero
-      if (dto.clienteId && saldoPendienteRedondeado > 0) {
-        await terceroRepo.increment(
-          { id: dto.clienteId },
-          'saldoActual',
-          saldoPendienteRedondeado,
-        );
-      }
-
-      // Confirmar transacción
-      await queryRunner.commitTransaction();
-
-      // G. Registrar movimiento en caja DESPUÉS del commit (para evitar FK constraint)
-      if (dto.montoPagado > 0 && dto.metodoPago) {
+        // G. Registrar movimiento en caja automáticamente
         try {
           await this.cajaService.registrarMovimiento({
             monto: dto.montoPagado,
@@ -261,7 +239,6 @@ export class VentasService {
             origen: OrigenMovimiento.VENTA,
             metodoPago: mapearMetodoPagoACaja(dto.metodoPago),
             descripcion: `Cobro venta ${comprobante.id.substring(0, 8)}`,
-            comprobanteId: comprobante.id,
           });
           this.logger.log(
             `Movimiento de caja registrado automáticamente para venta ${comprobante.id}`,
@@ -276,6 +253,18 @@ export class VentasService {
         }
       }
 
+      // H. Si hay clienteId y saldoPendiente > 0, actualizar saldoActual del Tercero
+      if (dto.clienteId && saldoPendienteRedondeado > 0) {
+        await terceroRepo.increment(
+          { id: dto.clienteId },
+          'saldoActual',
+          saldoPendienteRedondeado,
+        );
+      }
+
+      // Confirmar transacción
+      await queryRunner.commitTransaction();
+
       // H. Construir y retornar respuesta
       const mensaje = this.generarMensajeVenta(
         estadoPago,
@@ -285,7 +274,6 @@ export class VentasService {
       return {
         comprobante: {
           id: comprobante.id,
-          numeroComprobante: comprobante.numeroComprobante || '',
           tipo: comprobante.tipo,
           total: comprobante.total,
           saldoPendiente: comprobante.saldoPendiente,
@@ -378,6 +366,27 @@ export class VentasService {
 
       await cobroRepo.save(cobro);
 
+      // A.1. Registrar movimiento en caja automáticamente
+      try {
+        await this.cajaService.registrarMovimiento({
+          monto: dto.monto,
+          tipo: TipoMovimiento.INGRESO,
+          origen: OrigenMovimiento.VENTA,
+          metodoPago: mapearMetodoPagoACaja(dto.metodoPago),
+          descripcion: `Cobro diferido venta ${comprobante.id.substring(0, 8)}`,
+        });
+        this.logger.log(
+          `Movimiento de caja registrado para cobro ${cobro.id} de venta ${comprobante.id}`,
+        );
+      } catch (error) {
+        // Si no hay caja abierta, solo registrar advertencia pero NO fallar el cobro
+        const errorMessage =
+          error instanceof Error ? error.message : 'Error desconocido';
+        this.logger.warn(
+          `No se pudo registrar movimiento en caja para cobro ${cobro.id}: ${errorMessage}`,
+        );
+      }
+
       // B. Actualizar saldoPendiente del Comprobante
       const nuevoSaldoPendiente = comprobante.saldoPendiente - dto.monto;
       const nuevoSaldoPendienteRedondeado =
@@ -404,27 +413,6 @@ export class VentasService {
 
       // Confirmar transacción
       await queryRunner.commitTransaction();
-
-      // Registrar movimiento en caja DESPUÉS del commit
-      try {
-        await this.cajaService.registrarMovimiento({
-          monto: dto.monto,
-          tipo: TipoMovimiento.INGRESO,
-          origen: OrigenMovimiento.VENTA,
-          metodoPago: mapearMetodoPagoACaja(dto.metodoPago),
-          descripcion: `Cobro diferido venta ${comprobante.id.substring(0, 8)}`,
-          comprobanteId: comprobante.id,
-        });
-        this.logger.log(
-          `Movimiento de caja registrado para cobro ${cobro.id} de venta ${comprobante.id}`,
-        );
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Error desconocido';
-        this.logger.warn(
-          `No se pudo registrar movimiento en caja para cobro ${cobro.id}: ${errorMessage}`,
-        );
-      }
 
       // D. Construir y retornar respuesta
       const mensaje = this.generarMensajeCobro(
@@ -915,169 +903,6 @@ export class VentasService {
   }
 
   /**
-   * MÉTODO: Anular Venta
-   *
-   * Anula una venta existente realizando las siguientes operaciones atómicas:
-   *
-   * 1. Validar que el comprobante existe, no está eliminado, es tipo VENTA
-   * 2. Validar que pertenece a la sesión de caja actual
-   * 3. Soft delete del comprobante (eliminado=true)
-   * 4. Revertir stock de cada producto vendido
-   * 5. Crear movimiento EGRESO/DEVOLUCION en caja
-   * 6. Ajustar saldo del cliente si aplica
-   *
-   * @param comprobanteId ID del comprobante a anular
-   * @param dto Datos de anulación (motivo)
-   * @param empresaId ID de la empresa (tenant)
-   * @param sesionCajaId ID de la sesión de caja actual
-   * @returns Respuesta con información de la anulación
-   */
-  async anularVenta(
-    comprobanteId: string,
-    dto: AnularVentaDto,
-    empresaId: string,
-    sesionCajaId: string,
-  ): Promise<AnularVentaResponseDto> {
-    // 1. Buscar el comprobante con sus relaciones
-    const comprobante = await this.comprobanteRepository.findOne({
-      where: {
-        id: comprobanteId,
-        empresaId,
-        eliminado: false,
-        tipo: TipoComprobante.VENTA,
-      },
-      relations: ['tercero', 'detalles', 'cobros'],
-    });
-
-    if (!comprobante) {
-      throw new NotFoundException(
-        'Comprobante no encontrado o ya fue anulado',
-      );
-    }
-
-    // 2. Validar que existe sesión de caja abierta
-    const sesionActual = await this.cajaService.obtenerSesionActual();
-    if (!sesionActual) {
-      throw new BadRequestException(
-        'No hay una sesión de caja abierta. Debe abrir caja para anular ventas.',
-      );
-    }
-
-    if (sesionActual.id !== sesionCajaId) {
-      throw new BadRequestException(
-        'La sesión de caja no coincide con la sesión actual.',
-      );
-    }
-
-    // Iniciar transacción
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const comprobanteRepo = queryRunner.manager.getRepository(Comprobante);
-      const terceroRepo = queryRunner.manager.getRepository(Tercero);
-
-      // 3. Soft delete del comprobante
-      comprobante.eliminado = true;
-      comprobante.deletedAt = new Date();
-      await comprobanteRepo.save(comprobante);
-
-      // 4. Revertir stock de cada producto
-      let productosRevertidos = 0;
-      for (const detalle of comprobante.detalles) {
-        const producto = await queryRunner.manager.findOne(Producto, {
-          where: { id: detalle.productoId, empresaId },
-          lock: { mode: 'pessimistic_write' },
-        });
-
-        if (producto) {
-          producto.stockActual += detalle.cantidad;
-          await queryRunner.manager.save(Producto, producto);
-          productosRevertidos++;
-        }
-      }
-
-      // 5. Calcular monto total cobrado para la devolución
-      const totalCobrado = comprobante.cobros.reduce(
-        (sum, cobro) => sum + cobro.monto,
-        0,
-      );
-
-      // 6. Crear movimiento EGRESO/DEVOLUCION en caja (si hubo cobros)
-      let movimientoDevolucion: {
-        id: string;
-        monto: number;
-        tipo: string;
-        origen: string;
-      } | null = null;
-      if (totalCobrado > 0) {
-        try {
-          const movimiento = await this.cajaService.registrarMovimiento({
-            monto: totalCobrado,
-            tipo: TipoMovimiento.EGRESO,
-            origen: OrigenMovimiento.DEVOLUCION,
-            metodoPago: comprobante.cobros[0]
-              ? mapearMetodoPagoACaja(comprobante.cobros[0].metodo)
-              : mapearMetodoPagoACaja('EFECTIVO' as any),
-            descripcion: `ANULACIÓN: ${dto.motivoAnulacion.substring(0, 100)} - Venta ${comprobante.id.substring(0, 8)}`,
-            comprobanteId: comprobante.id,
-          });
-
-          movimientoDevolucion = {
-            id: movimiento.id,
-            monto: movimiento.monto,
-            tipo: movimiento.tipo,
-            origen: movimiento.origen,
-          };
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Error desconocido';
-          this.logger.warn(
-            `No se pudo registrar movimiento de devolución en caja: ${errorMessage}`,
-          );
-        }
-      }
-
-      // 7. Ajustar saldo del tercero si aplica
-      let saldoClienteAjustado: number | null = null;
-      if (comprobante.terceroId && comprobante.saldoPendiente > 0) {
-        // Si había saldo pendiente, reducirlo del saldo del cliente
-        await terceroRepo.decrement(
-          { id: comprobante.terceroId },
-          'saldoActual',
-          comprobante.saldoPendiente,
-        );
-        saldoClienteAjustado = -comprobante.saldoPendiente;
-      }
-
-      // Confirmar transacción
-      await queryRunner.commitTransaction();
-
-      this.logger.log(
-        `Venta ${comprobante.id} anulada exitosamente. Motivo: ${dto.motivoAnulacion}`,
-      );
-
-      return {
-        comprobante: {
-          id: comprobante.id,
-          total: comprobante.total,
-          estadoPago: comprobante.estadoPago,
-        },
-        movimientoDevolucion,
-        productosRevertidos,
-        saldoClienteAjustado,
-        mensaje: `Venta anulada exitosamente. Stock revertido para ${productosRevertidos} producto(s).${totalCobrado > 0 ? ` Devolución de $${totalCobrado.toFixed(2)} registrada.` : ''}`,
-      };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
-  }
-
-  /**
    * Helper: Redondear a 2 decimales
    */
   private redondear(valor: number): number {
@@ -1115,37 +940,5 @@ export class VentasService {
     } else {
       return `Cobro registrado exitosamente. Saldo pendiente: $${saldoPendiente.toFixed(2)}`;
     }
-  }
-
-  /**
-   * Genera número de comprobante correlativo para ventas
-   * Formato: VTA-0001, VTA-0002, etc.
-   */
-  private async generarNumeroComprobanteVenta(
-    empresaId: string,
-  ): Promise<string> {
-    // Obtener última venta de la empresa
-    const ultimaVenta = await this.comprobanteRepository.findOne({
-      where: {
-        empresaId,
-        tipo: TipoComprobante.VENTA,
-      },
-      order: {
-        createdAt: 'DESC',
-      },
-    });
-
-    let numero = 1;
-
-    if (ultimaVenta && ultimaVenta.numeroComprobante) {
-      // Extraer número del formato VTA-0001
-      const match = ultimaVenta.numeroComprobante.match(/VTA-(\d+)/);
-      if (match) {
-        numero = parseInt(match[1], 10) + 1;
-      }
-    }
-
-    // Formatear número con padding de 4 dígitos
-    return `VTA-${numero.toString().padStart(4, '0')}`;
   }
 }

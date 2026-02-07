@@ -1,4 +1,4 @@
-import { Injectable, Scope, Inject, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, Scope, Inject, BadRequestException } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -40,8 +40,6 @@ interface RequestWithUser extends Request {
  */
 @Injectable({ scope: Scope.REQUEST })
 export class CajaService extends TenantBaseService<CajaSesion> {
-  private readonly logger = new Logger(CajaService.name);
-
   constructor(
     @InjectRepository(CajaSesion)
     repository: Repository<CajaSesion>,
@@ -170,19 +168,14 @@ export class CajaService extends TenantBaseService<CajaSesion> {
    * @throws BadRequestException si no hay sesión abierta
    */
   async registrarMovimiento(dto: CrearMovimientoDto): Promise<MovimientoCaja> {
-    // DEBUG: Log para verificar contexto de request
-    this.logger.log(`registrarMovimiento llamado - empresaId: ${this.empresaId}, dto: ${JSON.stringify(dto)}`);
-
     // 1. Buscar sesión abierta (usar método interno que devuelve entidad)
     const sesionAbierta = await this._obtenerSesionActualEntity();
 
     if (!sesionAbierta) {
-      this.logger.error(`No hay sesión abierta para empresaId: ${this.empresaId}`);
       throw new BadRequestException(
         'No hay una sesión de caja abierta. Debe abrir caja antes de registrar movimientos.',
       );
     }
-    this.logger.log(`Sesión abierta encontrada: ${sesionAbierta.id}`);
 
     // 2. Crear movimiento
     const movimiento = this.movimientoRepository.create({
@@ -193,12 +186,10 @@ export class CajaService extends TenantBaseService<CajaSesion> {
       origen: dto.origen,
       metodoPago: dto.metodoPago,
       descripcion: dto.descripcion,
-      comprobanteId: dto.comprobanteId || null,
       empresaId: this.empresaId,
     });
 
     const movimientoGuardado = await this.movimientoRepository.save(movimiento);
-    this.logger.log(`Movimiento guardado con ID: ${movimientoGuardado.id}`);
 
     // 3. Actualizar saldo SOLO si es EFECTIVO
     if (dto.metodoPago === MetodoPagoCaja.EFECTIVO) {
