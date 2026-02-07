@@ -56,6 +56,7 @@ export interface MovimientoCaja {
   descripcion: string; // Descripción/concepto del movimiento
   fecha: string; // ISO string
   empresaId: string;
+  comprobanteId: string | null; // ID del comprobante asociado (para ventas)
   createdAt: string;
   updatedAt: string;
 }

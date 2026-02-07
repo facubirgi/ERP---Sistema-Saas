@@ -8,6 +8,7 @@ import {
   Index,
 } from 'typeorm';
 import { Empresa } from '../../tenant/entities/empresa.entity';
+import { Comprobante } from '../../ventas/entities/comprobante.entity';
 import { TipoMovimiento, OrigenMovimiento, MetodoPagoCaja } from '../enums';
 import { CajaSesion } from './caja-sesion.entity';
 
@@ -133,6 +134,24 @@ export class MovimientoCaja {
   @ManyToOne(() => Empresa, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'empresa_id' })
   empresa: Empresa;
+
+  // RELACIÓN OPCIONAL CON COMPROBANTE (para ventas)
+  /**
+   * ID del comprobante asociado (si el movimiento proviene de una venta)
+   * - Nullable: movimientos como APERTURA, GASTO, RETIRO no tienen comprobante
+   * - Permite vincular el movimiento con la venta original
+   * - Facilita la anulación de ventas desde caja
+   */
+  @Column({ type: 'uuid', nullable: true, name: 'comprobante_id' })
+  comprobanteId: string | null;
+
+  /**
+   * Relación con Comprobante
+   * - onDelete: SET NULL - si se elimina el comprobante, el movimiento permanece
+   */
+  @ManyToOne(() => Comprobante, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'comprobante_id' })
+  comprobante: Comprobante | null;
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   createdAt: Date;

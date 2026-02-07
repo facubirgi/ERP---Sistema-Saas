@@ -49,6 +49,9 @@ export class AuthService {
           id: empresa.id,
           razonSocial: empresa.razonSocial,
           email: empresa.email,
+          cuit: empresa.cuit || null,
+          direccion: empresa.direccion || null,
+          telefono: empresa.telefono || null,
         },
         usuario: {
           id: usuario.id,
@@ -108,6 +111,10 @@ export class AuthService {
         empresa: {
           id: empresa.id,
           razonSocial: empresa.razonSocial,
+          email: empresa.email,
+          cuit: empresa.cuit || null,
+          direccion: empresa.direccion || null,
+          telefono: empresa.telefono || null,
         },
       };
     } catch (error) {
@@ -167,6 +174,9 @@ export class AuthService {
         id: empresa.id,
         razonSocial: empresa.razonSocial,
         email: empresa.email,
+        cuit: empresa.cuit || null,
+        direccion: empresa.direccion || null,
+        telefono: empresa.telefono || null,
       },
       usuario: {
         id: usuario.id,

@@ -69,8 +69,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             rol: sessionData.usuario.rol as UsuarioRol,
             nombre: sessionData.usuario.nombre,
             razonSocial: sessionData.empresa.razonSocial,
+            empresaCuit: sessionData.empresa.cuit || null,
+            empresaDireccion: sessionData.empresa.direccion || null,
+            empresaTelefono: sessionData.empresa.telefono || null,
+            empresaEmail: sessionData.empresa.email || null,
           };
-          
+
           setUser(authUser);
           // Update localStorage with fresh data
           localStorage.setItem(USER_KEY, JSON.stringify(authUser));
@@ -103,6 +107,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         rol: response.usuario.rol,
         nombre: response.usuario.nombre,
         razonSocial: response.empresa.razonSocial,
+        empresaCuit: response.empresa.cuit || null,
+        empresaDireccion: response.empresa.direccion || null,
+        empresaTelefono: response.empresa.telefono || null,
+        empresaEmail: response.empresa.email || null,
       };
 
       setUser(authUser);
@@ -127,6 +135,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         rol: response.usuario.rol,
         nombre: response.usuario.nombre,
         razonSocial: response.empresa.razonSocial,
+        empresaCuit: response.empresa.cuit || null,
+        empresaDireccion: response.empresa.direccion || null,
+        empresaTelefono: response.empresa.telefono || null,
+        empresaEmail: response.empresa.email || null,
       };
 
       setUser(authUser);

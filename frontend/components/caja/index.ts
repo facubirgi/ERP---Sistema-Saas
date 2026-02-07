@@ -18,3 +18,4 @@ export { BarraAcciones } from './BarraAcciones';
 export { ModalApertura } from './ModalApertura';
 export { ModalRegistrarGasto } from './ModalRegistrarGasto';
 export { ModalCierre } from './ModalCierre';
+export { ModalAnularVenta } from './ModalAnularVenta';

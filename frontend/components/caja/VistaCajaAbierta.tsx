@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lock } from 'lucide-react';
 import { useCaja } from '@/hooks/useCaja';
 import { useExportarCobros } from '@/hooks';
@@ -7,6 +7,8 @@ import { BarraAcciones } from './BarraAcciones';
 import { MovimientosTable } from './MovimientosTable';
 import { ModalRegistrarGasto } from './ModalRegistrarGasto';
 import { ModalCierre } from './ModalCierre';
+import { ModalAnularVenta } from './ModalAnularVenta';
+import type { MovimientoCaja } from '@/lib/types/caja.types';
 
 /**
  * Componente VistaCajaAbierta
@@ -36,12 +38,33 @@ export function VistaCajaAbierta() {
     saldoEfectivo,
     formatearMonto,
     formatearHora,
+    refrescarSesion,
   } = useCaja();
 
   const { exportarCobros, loading: loadingExportacion } = useExportarCobros();
 
+  // Refrescar movimientos al montar el componente
+  // Esto asegura que los movimientos creados desde otros módulos (ventas) se muestren
+  useEffect(() => {
+    refrescarSesion();
+  }, [refrescarSesion]);
+
   const [isGastoModalOpen, setIsGastoModalOpen] = useState(false);
   const [isCierreModalOpen, setIsCierreModalOpen] = useState(false);
+  const [isAnularModalOpen, setIsAnularModalOpen] = useState(false);
+  const [movimientoAAnular, setMovimientoAAnular] = useState<MovimientoCaja | null>(null);
+
+  // Handler para abrir modal de anulación
+  const handleAnularVenta = (movimiento: MovimientoCaja) => {
+    setMovimientoAAnular(movimiento);
+    setIsAnularModalOpen(true);
+  };
+
+  // Handler para cerrar modal de anulación
+  const handleCloseAnularModal = () => {
+    setIsAnularModalOpen(false);
+    setMovimientoAAnular(null);
+  };
 
   // Si no hay sesión, no renderizar nada (el CajaDashboard debería manejar esto)
   if (!sesion) {
@@ -70,6 +93,7 @@ export function VistaCajaAbierta() {
         movimientos={movimientos}
         formatearMonto={formatearMonto}
         formatearHora={formatearHora}
+        onAnularVenta={handleAnularVenta}
       />
 
       {/* Sección 4: Botón de Cierre (Destacado) */}
@@ -112,6 +136,15 @@ export function VistaCajaAbierta() {
         saldoEsperadoEfectivo={saldoEfectivo}
         onSuccess={() => {
           // El cambio de vista se maneja automáticamente
+        }}
+      />
+
+      <ModalAnularVenta
+        isOpen={isAnularModalOpen}
+        onClose={handleCloseAnularModal}
+        movimiento={movimientoAAnular}
+        onSuccess={() => {
+          // Los movimientos se actualizan automáticamente via recargarSesion en el modal
         }}
       />
     </div>

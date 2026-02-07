@@ -1,9 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   Min,
 } from 'class-validator';
@@ -79,4 +81,13 @@ export class CrearMovimientoDto {
     message: 'La descripción no puede exceder 500 caracteres',
   })
   descripcion: string;
+
+  @ApiPropertyOptional({
+    description:
+      'ID del comprobante asociado (para movimientos de venta/devolución)',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsOptional()
+  @IsUUID('4', { message: 'El ID del comprobante debe ser un UUID válido' })
+  comprobanteId?: string;
 }

@@ -268,6 +268,7 @@ export interface PaginatedResponse<T> {
 export interface VentaResponseDto {
   comprobante: {
     id: string;
+    numeroComprobante: string;
     tipo: TipoComprobante;
     total: number;
     saldoPendiente: number;
@@ -640,5 +641,38 @@ export interface DetalleCotizacionResponseDto {
  */
 export interface CotizacionResponseDto {
   cotizacion: DetalleCotizacionResponseDto;
+  mensaje: string;
+}
+
+// ============================================================================
+// ANULACIÓN DE VENTAS
+// ============================================================================
+
+/**
+ * DTO para anular una venta
+ * Mapea a: backend/src/ventas/dto/anular-venta.dto.ts
+ */
+export interface AnularVentaDto {
+  motivoAnulacion: string; // Mínimo 10 caracteres, máximo 500
+}
+
+/**
+ * Respuesta al anular una venta
+ * Mapea a: backend/src/ventas/dto/anular-venta-response.dto.ts
+ */
+export interface AnularVentaResponseDto {
+  comprobante: {
+    id: string;
+    total: number;
+    estadoPago: string;
+  };
+  movimientoDevolucion: {
+    id: string;
+    monto: number;
+    tipo: string;
+    origen: string;
+  } | null;
+  productosRevertidos: number;
+  saldoClienteAjustado: number | null;
   mensaje: string;
 }

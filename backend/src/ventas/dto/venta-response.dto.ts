@@ -14,6 +14,12 @@ class ComprobanteSimpleDto {
   id: string;
 
   @ApiProperty({
+    description: 'Número de comprobante correlativo',
+    example: 'VTA-0001',
+  })
+  numeroComprobante: string;
+
+  @ApiProperty({
     description: 'Tipo de comprobante',
     enum: TipoComprobante,
     example: TipoComprobante.VENTA,
