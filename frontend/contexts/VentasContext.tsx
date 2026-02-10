@@ -116,7 +116,6 @@ export function VentasProvider({ children }: { children: React.ReactNode }) {
     } else {
       setError(defaultMessage);
     }
-    console.error(defaultMessage, err);
   }, []);
 
   const clearError = useCallback(() => {
@@ -316,9 +315,6 @@ export function VentasProvider({ children }: { children: React.ReactNode }) {
         await fetchCotizaciones();
         return cotizacion;
       } catch (err) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Error detallado al actualizar cotización:', err);
-        }
         handleError(err, 'Error al actualizar cotización');
         return null;
       } finally {

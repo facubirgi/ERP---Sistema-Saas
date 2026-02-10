@@ -54,7 +54,6 @@ export function useProductos(options: UseProductosOptions = {}) {
         setProductos(response.data);
         setPaginationInfo(response);
       } catch (error) {
-        console.error('Error loading productos:', error);
         showError('Error al cargar productos', 'No se pudieron cargar los productos');
       } finally {
         setIsLoading(false);
@@ -73,7 +72,7 @@ export function useProductos(options: UseProductosOptions = {}) {
       const response = await CategoriasApi.getAll({ page: 1, limit: 100 });
       setCategorias(response.data);
     } catch (error) {
-      console.error('Error loading categorias:', error);
+      // silently fail - categorias are non-critical
     }
   }, [isAuthenticated]);
 
@@ -99,7 +98,7 @@ export function useProductos(options: UseProductosOptions = {}) {
           setCategorias(categoriasResponse.data);
         }
       } catch (error) {
-        console.error('Error loading data:', error);
+        // handled by individual loaders
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -137,7 +136,6 @@ export function useProductos(options: UseProductosOptions = {}) {
         setProductos(response.data);
         setPaginationInfo(response);
       } catch (error) {
-        console.error('Error searching productos:', error);
         showError('Error en la búsqueda', 'No se pudo realizar la búsqueda');
       } finally {
         setIsLoading(false);
@@ -170,7 +168,6 @@ export function useProductos(options: UseProductosOptions = {}) {
         await loadProductos(currentPage);
         return true;
       } catch (error: unknown) {
-        console.error('Error creating producto:', error);
         const errorMessage = error instanceof Error ? error.message : 'Error al crear el producto. Por favor, intenta de nuevo.';
         showError('Error al crear producto', errorMessage);
         return false;
@@ -192,7 +189,6 @@ export function useProductos(options: UseProductosOptions = {}) {
         await loadProductos(currentPage);
         return true;
       } catch (error: unknown) {
-        console.error('Error updating producto:', error);
         const errorMessage = error instanceof Error ? error.message : 'Error al actualizar el producto. Por favor, intenta de nuevo.';
         showError('Error al actualizar producto', errorMessage);
         return false;
@@ -214,7 +210,6 @@ export function useProductos(options: UseProductosOptions = {}) {
         await loadProductos(currentPage);
         return true;
       } catch (error: unknown) {
-        console.error('Error deleting producto:', error);
         const errorMessage = error instanceof Error ? error.message : 'Error al eliminar el producto. Por favor, intenta de nuevo.';
         showError('Error al eliminar producto', errorMessage);
         return false;

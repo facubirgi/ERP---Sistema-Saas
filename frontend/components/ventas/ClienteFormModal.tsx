@@ -152,7 +152,6 @@ export function ClienteFormModal({ isOpen, onClose, cliente, onSuccess }: Client
         }
       }
     } catch (err) {
-      console.error('Error al guardar cliente:', err);
     } finally {
       setIsSubmitting(false);
     }

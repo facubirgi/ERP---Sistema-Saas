@@ -96,9 +96,6 @@ export function InventarioProvider({ children }: { children: React.ReactNode }) 
   const handleError = useCallback((err: unknown, defaultMessage: string) => {
     const errorMessage = err instanceof Error ? err.message : defaultMessage;
     setError(errorMessage);
-    if (process.env.NODE_ENV === 'development') {
-      console.error(defaultMessage, err);
-    }
   }, []);
 
   const clearError = useCallback(() => {

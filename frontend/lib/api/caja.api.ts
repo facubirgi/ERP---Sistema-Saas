@@ -45,12 +45,10 @@ export class CajaApi extends BaseApiClient {
       }
       // Errores de autenticación o autorización
       if (err.statusCode === 401 || err.statusCode === 403) {
-        console.error('Error de autenticación/autorización:', err);
         throw new Error('No autorizado para acceder a la sesión de caja');
       }
       // Otros errores del servidor
       if (typeof err.statusCode === 'number' && err.statusCode >= 500) {
-        console.error('Error del servidor:', err);
         throw new Error('Error del servidor al obtener sesión de caja');
       }
       throw err;

@@ -45,7 +45,6 @@ export default function DashboardPage() {
         setCuentasCobrar(cuentasData);
         setStockCritico(stockData);
       } catch (err: any) {
-        console.error('Error al cargar métricas:', err);
         setError(err.message || 'Error al cargar las métricas del dashboard');
       } finally {
         setLoading(false);

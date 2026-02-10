@@ -58,7 +58,6 @@ export function ClientesView() {
         setClientes(response);
       }
     } catch (error) {
-      console.error('Error al cargar clientes:', error);
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,7 @@
 // DASHBOARD INVENTARIO VIEW - Vista Principal del Dashboard
 // ============================================================================
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Package,
   FolderOpen,
@@ -39,7 +39,7 @@ export function DashboardInventarioView({
   const [recentProducts, setRecentProducts] = useState<Producto[]>([]);
   const [searchResults, setSearchResults] = useState<Producto[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [isLoadingData, setIsLoadingData] = useState(false);
+  const isLoadingRef = useRef(false);
   const [metricas, setMetricas] = useState({
     totalProductos: 0,
     productosBajoStock: 0,
@@ -54,20 +54,15 @@ export function DashboardInventarioView({
 
   const loadDashboardData = useCallback(async () => {
     // Prevenir múltiples llamadas simultáneas
-    if (isLoadingData) return;
+    if (isLoadingRef.current) return;
 
-    setIsLoadingData(true);
+    isLoadingRef.current = true;
     try {
-      console.log('[DEBUG] Fetching productos and categorias...');
-
       // Cargar productos y categorías en paralelo
       const [productosResponse, categoriasResponse] = await Promise.all([
         fetchProductos({ page: 1, limit: 100 }), // Cargar todos para métricas
         fetchCategorias({ page: 1, limit: 100 }),
       ]);
-
-      console.log('[DEBUG] Productos response:', productosResponse);
-      console.log('[DEBUG] Categorias response:', categoriasResponse);
 
       if (productosResponse && categoriasResponse) {
         // Guardar productos recientes (primeros 5)
@@ -92,15 +87,14 @@ export function DashboardInventarioView({
           totalCategorias: categoriasResponse.data.length,
         };
 
-        console.log('[DEBUG] Calculated metrics:', metrics);
         setMetricas(metrics);
       }
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      // Error loading dashboard data
     } finally {
-      setIsLoadingData(false);
+      isLoadingRef.current = false;
     }
-  }, [fetchProductos, fetchCategorias, isLoadingData]);
+  }, [fetchProductos, fetchCategorias]);
 
   const handleSearch = async (query: string) => {
     if (query.trim().length >= 2) {
@@ -111,7 +105,7 @@ export function DashboardInventarioView({
           setSearchResults(response.data);
         }
       } catch (error) {
-        console.error('Error al buscar:', error);
+        // Error al buscar
       } finally {
         setIsSearching(false);
       }
@@ -129,17 +123,14 @@ export function DashboardInventarioView({
   useEffect(() => {
     // Esperar a que termine de cargar el AuthContext
     if (authLoading) {
-      console.log('[DEBUG] Dashboard waiting for auth...');
       return;
     }
 
     // Si no está autenticado después de cargar, no intentar cargar datos
     if (!isAuthenticated) {
-      console.log('[DEBUG] Dashboard: User not authenticated');
       return;
     }
 
-    console.log('[DEBUG] Dashboard loading data for authenticated user');
     loadDashboardData();
   }, [isAuthenticated, authLoading, loadDashboardData]);
 

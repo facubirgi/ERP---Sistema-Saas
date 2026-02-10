@@ -79,8 +79,7 @@ export function WhatsAppButton({
         }
         datosPDF = datos;
       } catch (error) {
-        console.error('Error al obtener datos de cotización:', error);
-        setError('Error al cargar datos. Intenta nuevamente.');
+          setError('Error al cargar datos. Intenta nuevamente.');
         setGenerandoPDF(false);
         return;
       }
@@ -92,8 +91,7 @@ export function WhatsAppButton({
       try {
         generarPDFCotizacion(datosPDF);
       } catch (error) {
-        console.error('Error al generar PDF:', error);
-        setError('Error al generar el PDF. Intenta nuevamente.');
+          setError('Error al generar el PDF. Intenta nuevamente.');
         return;
       }
     }

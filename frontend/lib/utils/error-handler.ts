@@ -58,9 +58,6 @@ export async function withErrorHandling<T>(
     } catch (error) {
       const appError = AppError.fromApiError(error);
 
-      // Log en consola para debugging
-      console.error('[ErrorHandler]', appError.toJSON());
-
       // Manejar error 401 (no autenticado)
       if (appError.type === ErrorType.UNAUTHORIZED && onUnauthorized) {
         onUnauthorized();
@@ -70,7 +67,6 @@ export async function withErrorHandling<T>(
       // Retry automático para errores de red
       if (appError.retryable && enableRetry && retries < maxRetries) {
         retries++;
-        console.log(`[ErrorHandler] Reintentando... (${retries}/${maxRetries})`);
         await delay(Math.pow(2, retries) * 1000); // Exponential backoff
         continue;
       }

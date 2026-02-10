@@ -127,7 +127,6 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
         handleClose();
       }
     } catch (err) {
-      console.error('Error al registrar cobro:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -162,7 +161,6 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
     try {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        console.error('No se pudo abrir la ventana de impresión');
         return;
       }
 
@@ -183,11 +181,9 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
           printWindow.print();
           printWindow.close();
         } catch (err) {
-          console.error('Error al imprimir:', err);
         }
       }, 250);
     } catch (error) {
-      console.error('Error en handleImprimirComprobante:', error);
     }
   }, []);
 
@@ -306,7 +302,6 @@ export function CobroFormModal({ isOpen, onClose, venta, onSuccess }: CobroFormM
         duration: 3000,
       });
     } catch (error) {
-      console.error('Error al generar PDF:', error);
       addNotification({
         type: 'error',
         title: 'Error',

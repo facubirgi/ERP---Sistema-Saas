@@ -34,10 +34,8 @@ export function StockBajoView() {
           setProductos(response.data);
           setPaginationInfo(response);
         }
-      } catch (error) {
-        if (isMounted) {
-          console.error('Error al cargar productos:', error);
-        }
+      } catch {
+        // Error silenciado
       }
     };
 

@@ -80,9 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         // If validation fails (401, network error, etc), clear session
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Session validation failed:', error);
-        }
         localStorage.removeItem(USER_KEY);
       } finally {
         setLoading(false);
@@ -146,9 +143,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await AuthApi.logout();
     } catch (error) {
       // Even if logout fails, clear local state
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Logout error:', error);
-      }
     } finally {
       // Always clear local state
       setUser(null);

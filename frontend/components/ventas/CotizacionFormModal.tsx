@@ -140,7 +140,6 @@ export function CotizacionFormModal({ isOpen, onClose, onSuccess, cotizacionId }
         setClientes(response);
       }
     } catch (error) {
-      console.error('Error al cargar clientes:', error);
     }
   };
 
@@ -190,7 +189,6 @@ export function CotizacionFormModal({ isOpen, onClose, onSuccess, cotizacionId }
         });
       }
     } catch (error) {
-      console.error('Error al cargar cotización:', error);
       setFormErrors({ general: 'Error al cargar la cotización' });
     } finally {
       setIsLoadingCotizacion(false);
@@ -234,7 +232,6 @@ export function CotizacionFormModal({ isOpen, onClose, onSuccess, cotizacionId }
     try {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        console.error('No se pudo abrir la ventana de impresión');
         return;
       }
       
@@ -255,11 +252,9 @@ export function CotizacionFormModal({ isOpen, onClose, onSuccess, cotizacionId }
           printWindow.print();
           printWindow.close();
         } catch (err) {
-          console.error('Error al imprimir:', err);
         }
       }, 250);
     } catch (error) {
-      console.error('Error en handleImprimirCotizacion:', error);
     }
   }, []);
 
@@ -332,7 +327,6 @@ export function CotizacionFormModal({ isOpen, onClose, onSuccess, cotizacionId }
             items,
           };
 
-          console.log('📝 Datos a enviar para actualizar:', { cotizacionId, data });
           const result = await actualizarCotizacion(cotizacionId, data);
           if (result) {
             onSuccess?.();
@@ -354,7 +348,6 @@ export function CotizacionFormModal({ isOpen, onClose, onSuccess, cotizacionId }
           }
         }
       } catch (err) {
-        console.error(`Error al ${isEditMode ? 'actualizar' : 'crear'} cotización:`, err);
         setFormErrors({ general: `Error al ${isEditMode ? 'actualizar' : 'crear'} la cotización` });
       } finally {
         setIsSubmitting(false);

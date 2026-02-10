@@ -50,7 +50,6 @@ export function useBusquedaProductos({
       }
     } catch (err: unknown) {
       if (!abortSignal?.aborted) {
-        console.error('Error al buscar productos:', err);
         setError('Error al buscar productos');
         setProductos([]);
         setMostrarResultados(false);

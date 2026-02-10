@@ -137,7 +137,6 @@ export function CajaProvider({ children }: { children: ReactNode }) {
     } else {
       setError(defaultMessage);
     }
-    console.error(defaultMessage, err);
   }, []);
 
   const clearError = useCallback(() => {

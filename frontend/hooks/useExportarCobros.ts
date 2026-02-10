@@ -53,7 +53,6 @@ export function useExportarCobros(): UseExportarCobrosReturn {
       } else {
         setError('Error al obtener datos de cobros');
       }
-      console.error('Error al exportar cobros:', err);
       return null;
     }
   }, [isAuthenticated]);
@@ -212,10 +211,8 @@ export function useExportarCobros(): UseExportarCobrosReturn {
 
       XLSX.writeFile(wb, nombreArchivo);
 
-      console.log('✅ Exportación completada:', nombreArchivo);
     } catch (err: unknown) {
       setError('Error al generar archivo Excel');
-      console.error('Error en exportarCobros:', err);
     } finally {
       setLoading(false);
     }

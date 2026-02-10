@@ -46,7 +46,6 @@ export function usePdfReporteCaja() {
       } else {
         setError('Error al obtener datos del reporte');
       }
-      console.error(err);
       return null;
     }
   }, []);
@@ -246,7 +245,6 @@ export function usePdfReporteCaja() {
       return doc;
     } catch (err) {
       setError('Error al generar PDF');
-      console.error(err);
       return null;
     } finally {
       setLoading(false);

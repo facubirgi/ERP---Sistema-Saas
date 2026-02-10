@@ -216,15 +216,6 @@ export class CotizacionesService {
     empresaId: string,
   ): Promise<CotizacionResponseDto> {
     try {
-      console.log('🔍 [ACTUALIZAR] Iniciando actualización de cotización:', {
-        id,
-        empresaId,
-      });
-      console.log(
-        '🔍 [ACTUALIZAR] DTO recibido:',
-        JSON.stringify(dto, null, 2),
-      );
-
       const cotizacion = await this.comprobanteRepo.findOne({
         where: {
           id,
@@ -236,46 +227,24 @@ export class CotizacionesService {
       });
 
       if (!cotizacion) {
-        console.error('❌ [ACTUALIZAR] Cotización no encontrada:', {
-          id,
-          empresaId,
-        });
         throw new NotFoundException('Cotización no encontrada');
       }
 
-      console.log('✅ [ACTUALIZAR] Cotización encontrada:', cotizacion.id);
-
       // Actualizar datos básicos
       if (dto.clienteNombre) {
-        console.log(
-          '📝 [ACTUALIZAR] Actualizando clienteNombre:',
-          dto.clienteNombre,
-        );
         cotizacion.clienteNombre = dto.clienteNombre;
       }
 
       if (dto.clienteId !== undefined) {
-        console.log('📝 [ACTUALIZAR] Actualizando clienteId:', dto.clienteId);
         cotizacion.terceroId = dto.clienteId || null;
       }
 
       // Actualizar items si se proporcionan
       if (dto.items && dto.items.length > 0) {
-        console.log(`📝 [ACTUALIZAR] Actualizando ${dto.items.length} items`);
-
         // Validar cálculo de subtotales
-        dto.items.forEach((item, index) => {
-          console.log(`🔍 [ACTUALIZAR] Validando item ${index + 1}:`, item);
+        dto.items.forEach((item) => {
           const subtotalCalculado = item.cantidad * item.precioUnitario;
           if (Math.abs(item.subtotal - subtotalCalculado) > 0.01) {
-            console.error(
-              `❌ [ACTUALIZAR] Error en subtotal del item ${item.nombreProducto}:`,
-              {
-                subtotalRecibido: item.subtotal,
-                subtotalCalculado,
-                diferencia: Math.abs(item.subtotal - subtotalCalculado),
-              },
-            );
             throw new BadRequestException(
               `El subtotal del item ${item.nombreProducto} no coincide con cantidad × precio`,
             );
@@ -286,16 +255,12 @@ export class CotizacionesService {
 
         // Usar transacción para actualización atómica
         await this.comprobanteRepo.manager.transaction(async (manager) => {
-          console.log('🔄 [ACTUALIZAR] Iniciando transacción');
-
           // Eliminar detalles anteriores
-          console.log('🗑️ [ACTUALIZAR] Eliminando detalles anteriores');
           await manager.delete(ComprobanteDetalle, {
             comprobanteId: cotizacion.id,
           });
 
           // Crear nuevos detalles
-          console.log('➕ [ACTUALIZAR] Creando nuevos detalles');
           const nuevosDetalles = itemsActualizados.map((item) =>
             manager.create(ComprobanteDetalle, {
               productoId: item.productoId,
@@ -308,7 +273,6 @@ export class CotizacionesService {
             }),
           );
 
-          console.log('💾 [ACTUALIZAR] Guardando nuevos detalles');
           await manager.save(ComprobanteDetalle, nuevosDetalles);
 
           // Recalcular total
@@ -316,36 +280,24 @@ export class CotizacionesService {
             (sum, item) => sum + item.subtotal,
             0,
           );
-          console.log('💰 [ACTUALIZAR] Nuevo total calculado:', nuevoTotal);
 
           // Actualizar el comprobante usando update() para evitar problemas con la relación
-          console.log('💾 [ACTUALIZAR] Actualizando cotización');
           await manager.update(Comprobante, cotizacion.id, {
             clienteNombre: cotizacion.clienteNombre,
             terceroId: cotizacion.terceroId,
             total: nuevoTotal,
           });
-
-          console.log('✅ [ACTUALIZAR] Transacción completada');
         });
       } else {
         // Guardar cambios sin transacción si solo se actualiza info básica
-        console.log(
-          '💾 [ACTUALIZAR] Guardando cambios básicos sin transacción',
-        );
         await this.comprobanteRepo.save(cotizacion);
       }
 
-      console.log('🎉 [ACTUALIZAR] Cotización actualizada exitosamente');
       return {
         cotizacion,
         mensaje: 'Cotización actualizada exitosamente',
       };
     } catch (error) {
-      console.error('💥 [ACTUALIZAR] Error al actualizar cotización:', error);
-      if (error instanceof Error) {
-        console.error('💥 [ACTUALIZAR] Stack trace:', error.stack);
-      }
       throw error;
     }
   }

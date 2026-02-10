@@ -122,7 +122,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
         setClientes(response);
       }
     } catch (error) {
-      console.error('Error al cargar clientes:', error);
+      // Error loading clients silently handled
     }
   };
 
@@ -164,7 +164,6 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
     try {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        console.error('No se pudo abrir la ventana de impresión');
         return;
       }
 
@@ -185,11 +184,11 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
           printWindow.print();
           printWindow.close();
         } catch (err) {
-          console.error('Error al imprimir:', err);
+          // Print error silently handled
         }
       }, 250);
     } catch (error) {
-      console.error('Error en handleImprimirComprobante:', error);
+      // Print comprobante error silently handled
     }
   }, []);
 
@@ -365,7 +364,6 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
         duration: 3000,
       });
     } catch (error) {
-      console.error('Error al generar PDF:', error);
       addNotification({
         type: 'error',
         title: 'Error',
@@ -459,7 +457,6 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
           handleClose();
         }
       } catch (err) {
-        console.error('Error al crear venta:', err);
         setFormErrors({ general: 'Error al crear la venta' });
       } finally {
         setIsSubmitting(false);

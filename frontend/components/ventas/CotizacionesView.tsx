@@ -150,7 +150,6 @@ export function CotizacionesView({ onNavigateToTab }: CotizacionesViewProps) {
       }
 
     } catch (error: unknown) {
-      console.error('Error al generar venta:', error);
       const errorMessage = error instanceof Error ? error.message : 'Por favor, intenta de nuevo.';
       showError('Error al generar venta', errorMessage);
     } finally {
@@ -179,7 +178,6 @@ export function CotizacionesView({ onNavigateToTab }: CotizacionesViewProps) {
         total: detalle.total,
       };
     } catch (error) {
-      console.error('Error al obtener detalles de cotización:', error);
       return null;
     }
   };

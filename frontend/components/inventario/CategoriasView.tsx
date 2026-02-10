@@ -81,9 +81,8 @@ export function CategoriasView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
-  const handleSearch = useCallback((query: string) => {
+  const handleSearch = useCallback((_query: string) => {
     // TODO: Implementar búsqueda en el servidor cuando la API lo soporte
-    console.log('Búsqueda:', query);
   }, []);
 
   const handlePageChange = useCallback((page: number) => {
