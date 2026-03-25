@@ -95,6 +95,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
                 "tipo" "public"."tercero_tipo_enum" NOT NULL,
                 "saldo_actual" numeric(12,2) NOT NULL DEFAULT '0',
                 "empresa_id" uuid NOT NULL,
+                "usuario_id" uuid,
                 "eliminado" boolean NOT NULL DEFAULT false,
                 "deleted_at" TIMESTAMP,
                 "created_at" TIMESTAMP NOT NULL DEFAULT now(),
@@ -118,6 +119,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
                 "tercero_id" uuid,
                 "cliente_nombre" character varying(200),
                 "empresa_id" uuid NOT NULL,
+                "usuario_id" uuid,
                 "eliminado" boolean NOT NULL DEFAULT false,
                 "deleted_at" TIMESTAMP,
                 "created_at" TIMESTAMP NOT NULL DEFAULT now(),
@@ -241,6 +243,15 @@ export class InitialSchema1767709652503 implements MigrationInterface {
             ON DELETE CASCADE ON UPDATE NO ACTION
         `);
 
+        // Tercero -> Usuario (SET NULL)
+        await queryRunner.query(`
+            ALTER TABLE "tercero"
+            ADD CONSTRAINT "FK_tercero_usuario"
+            FOREIGN KEY ("usuario_id")
+            REFERENCES "usuario"("id")
+            ON DELETE SET NULL ON UPDATE NO ACTION
+        `);
+
         // Comprobante -> Tercero (SET NULL)
         await queryRunner.query(`
             ALTER TABLE "comprobante"
@@ -257,6 +268,15 @@ export class InitialSchema1767709652503 implements MigrationInterface {
             FOREIGN KEY ("empresa_id")
             REFERENCES "empresa"("id")
             ON DELETE CASCADE ON UPDATE NO ACTION
+        `);
+
+        // Comprobante -> Usuario (SET NULL)
+        await queryRunner.query(`
+            ALTER TABLE "comprobante"
+            ADD CONSTRAINT "FK_comprobante_usuario"
+            FOREIGN KEY ("usuario_id")
+            REFERENCES "usuario"("id")
+            ON DELETE SET NULL ON UPDATE NO ACTION
         `);
 
         // ComprobanteDetalle -> Comprobante
@@ -366,12 +386,14 @@ export class InitialSchema1767709652503 implements MigrationInterface {
         await queryRunner.query(`CREATE INDEX "IDX_tercero_empresa_id" ON "tercero" ("empresa_id") `);
         await queryRunner.query(`CREATE INDEX "IDX_tercero_empresa_eliminado" ON "tercero" ("empresa_id", "eliminado") `);
         await queryRunner.query(`CREATE INDEX "IDX_tercero_empresa_tipo" ON "tercero" ("empresa_id", "tipo") `);
+        await queryRunner.query(`CREATE INDEX "IDX_tercero_usuario_id" ON "tercero" ("usuario_id") `);
 
         // Comprobante
         await queryRunner.query(`CREATE INDEX "IDX_comprobante_empresa_id" ON "comprobante" ("empresa_id") `);
         await queryRunner.query(`CREATE INDEX "IDX_comprobante_empresa_tipo" ON "comprobante" ("empresa_id", "tipo") `);
         await queryRunner.query(`CREATE INDEX "IDX_comprobante_empresa_estado_pago" ON "comprobante" ("empresa_id", "estado_pago") `);
         await queryRunner.query(`CREATE INDEX "IDX_comprobante_tercero_id" ON "comprobante" ("tercero_id") `);
+        await queryRunner.query(`CREATE INDEX "IDX_comprobante_usuario_id" ON "comprobante" ("usuario_id") `);
 
         // ComprobanteDetalle
         await queryRunner.query(`CREATE INDEX "IDX_comprobante_detalle_empresa_id" ON "comprobante_detalle" ("empresa_id") `);
@@ -414,10 +436,12 @@ export class InitialSchema1767709652503 implements MigrationInterface {
         await queryRunner.query(`DROP INDEX "public"."IDX_comprobante_detalle_producto"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_comprobante_detalle_comprobante"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_comprobante_detalle_empresa_id"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_comprobante_usuario_id"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_comprobante_tercero_id"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_comprobante_empresa_estado_pago"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_comprobante_empresa_tipo"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_comprobante_empresa_id"`);
+        await queryRunner.query(`DROP INDEX "public"."IDX_tercero_usuario_id"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_tercero_empresa_tipo"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_tercero_empresa_eliminado"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_tercero_empresa_id"`);
@@ -442,8 +466,10 @@ export class InitialSchema1767709652503 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "comprobante_detalle" DROP CONSTRAINT "FK_comprobante_detalle_empresa"`);
         await queryRunner.query(`ALTER TABLE "comprobante_detalle" DROP CONSTRAINT "FK_comprobante_detalle_producto"`);
         await queryRunner.query(`ALTER TABLE "comprobante_detalle" DROP CONSTRAINT "FK_comprobante_detalle_comprobante"`);
+        await queryRunner.query(`ALTER TABLE "comprobante" DROP CONSTRAINT "FK_comprobante_usuario"`);
         await queryRunner.query(`ALTER TABLE "comprobante" DROP CONSTRAINT "FK_comprobante_empresa"`);
         await queryRunner.query(`ALTER TABLE "comprobante" DROP CONSTRAINT "FK_comprobante_tercero"`);
+        await queryRunner.query(`ALTER TABLE "tercero" DROP CONSTRAINT "FK_tercero_usuario"`);
         await queryRunner.query(`ALTER TABLE "tercero" DROP CONSTRAINT "FK_tercero_empresa"`);
         await queryRunner.query(`ALTER TABLE "producto" DROP CONSTRAINT "FK_producto_empresa"`);
         await queryRunner.query(`ALTER TABLE "producto" DROP CONSTRAINT "FK_producto_categoria"`);

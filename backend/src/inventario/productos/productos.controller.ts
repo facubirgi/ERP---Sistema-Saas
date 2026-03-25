@@ -27,6 +27,9 @@ import { SearchProductoDto } from './dto/search-producto.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UsuarioRol } from '../../tenant/entities/usuario.entity';
 
 /**
  * CONTROLLER DE PRODUCTOS
@@ -43,7 +46,7 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
  */
 @ApiTags('Productos')
 @Controller('productos')
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 @ApiBearerAuth('JWT-auth')
 export class ProductosController {
   constructor(private readonly productosService: ProductosService) {}
@@ -52,6 +55,7 @@ export class ProductosController {
    * CREAR PRODUCTO
    */
   @Post()
+  @Roles(UsuarioRol.DUENO)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear nuevo producto',
@@ -256,6 +260,7 @@ export class ProductosController {
    * ACTUALIZAR PRODUCTO (CON MARGEN INTELIGENTE)
    */
   @Put(':id')
+  @Roles(UsuarioRol.DUENO)
   @ApiOperation({
     summary: 'Actualizar producto (Margen Inteligente)',
     description:
@@ -295,6 +300,7 @@ export class ProductosController {
    * ELIMINAR PRODUCTO (HARD DELETE)
    */
   @Delete(':id')
+  @Roles(UsuarioRol.DUENO)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Eliminar producto permanentemente',

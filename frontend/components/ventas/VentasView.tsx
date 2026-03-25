@@ -296,6 +296,9 @@ export function VentasView() {
                     Cliente
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
+                    Vendedor
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
                     Items
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase">
@@ -331,6 +334,9 @@ export function VentasView() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 font-medium">
                       {venta.tercero?.nombre || <span className="text-gray-400">Venta Anónima</span>}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {venta.usuario?.nombre || <span className="text-gray-400">—</span>}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {venta.cantidadItems} items

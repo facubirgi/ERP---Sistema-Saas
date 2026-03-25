@@ -50,6 +50,7 @@ export class TercerosService {
   async crear(
     dto: CrearTerceroDto,
     empresaId: string,
+    usuarioId?: string,
   ): Promise<TerceroResponseDto> {
     // Crear el tercero
     const tercero = this.terceroRepository.create({
@@ -57,6 +58,7 @@ export class TercerosService {
       direccion: dto.direccion || null,
       tipo: dto.tipo,
       empresaId,
+      usuarioId: usuarioId || null,
       saldoActual: 0, // Inicializar en 0
       eliminado: false,
       deletedAt: null,
@@ -65,7 +67,13 @@ export class TercerosService {
     // Guardar en la base de datos
     const terceroGuardado = await this.terceroRepository.save(tercero);
 
-    return this.mapearATerceroResponse(terceroGuardado);
+    // Recargar con relación usuario para incluirla en la respuesta
+    const terceroConUsuario = await this.terceroRepository.findOne({
+      where: { id: terceroGuardado.id },
+      relations: ['usuario'],
+    });
+
+    return this.mapearATerceroResponse(terceroConUsuario!);
   }
 
   /**
@@ -107,6 +115,7 @@ export class TercerosService {
     const terceros = await this.terceroRepository.find({
       where,
       order: { nombre: 'ASC' },
+      relations: ['usuario'],
     });
 
     return terceros.map((t) => this.mapearATerceroResponse(t));
@@ -127,6 +136,7 @@ export class TercerosService {
   ): Promise<TerceroResponseDto> {
     const tercero = await this.terceroRepository.findOne({
       where: { id, empresaId, eliminado: false },
+      relations: ['usuario'],
     });
 
     if (!tercero) {
@@ -179,9 +189,15 @@ export class TercerosService {
     }
 
     // Guardar cambios
-    const terceroActualizado = await this.terceroRepository.save(tercero);
+    await this.terceroRepository.save(tercero);
 
-    return this.mapearATerceroResponse(terceroActualizado);
+    // Recargar con relación usuario
+    const terceroActualizado = await this.terceroRepository.findOne({
+      where: { id },
+      relations: ['usuario'],
+    });
+
+    return this.mapearATerceroResponse(terceroActualizado!);
   }
 
   /**
@@ -263,6 +279,9 @@ export class TercerosService {
       saldoActual: tercero.saldoActual,
       createdAt: tercero.createdAt,
       updatedAt: tercero.updatedAt,
+      usuario: tercero.usuario
+        ? { id: tercero.usuario.id, nombre: tercero.usuario.nombre }
+        : null,
     };
   }
 }

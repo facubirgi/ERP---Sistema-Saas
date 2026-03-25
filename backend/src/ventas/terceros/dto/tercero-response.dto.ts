@@ -51,4 +51,11 @@ export class TerceroResponseDto {
     example: '2025-11-21T15:30:00Z',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Usuario que creó el tercero',
+    required: false,
+    nullable: true,
+  })
+  usuario?: { id: string; nombre: string } | null;
 }

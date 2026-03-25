@@ -39,6 +39,11 @@ export class BaseApiClient {
         unauthorizedHandler();
       }
 
+      // Ensure 403 errors always have a meaningful message
+      if (response.status === 403) {
+        apiError.message = error.message || 'No tenés permisos para realizar esta acción';
+      }
+
       throw apiError;
     }
 

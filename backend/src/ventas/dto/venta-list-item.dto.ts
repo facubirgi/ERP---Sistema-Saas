@@ -60,6 +60,19 @@ export class VentaListItemDto {
   cantidadItems: number;
 
   @ApiProperty({
+    description: 'Usuario que registró la venta',
+    required: false,
+    example: {
+      id: '123e4567-e89b-12d3-a456-426614174000',
+      nombre: 'Carlos López',
+    },
+  })
+  usuario?: {
+    id: string;
+    nombre: string;
+  };
+
+  @ApiProperty({
     description: 'Fecha de creación de la venta',
     example: '2025-11-21T10:00:00Z',
   })

@@ -133,11 +133,12 @@ export class CotizacionesController {
     @Body() dto: GenerarVentaDesdeCotizacionDto,
     @Req() req: RequestWithUser,
   ): Promise<VentaResponseDto> {
-    const { empresaId } = req.user;
+    const { empresaId, userId } = req.user;
     return this.cotizacionesService.generarVentaDesdeCotizacion(
       id,
       dto,
       empresaId,
+      userId,
     );
   }
 

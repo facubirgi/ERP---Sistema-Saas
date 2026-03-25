@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LockKeyhole, Coffee } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { ModalApertura } from './ModalApertura';
 
 /**
@@ -19,6 +20,7 @@ import { ModalApertura } from './ModalApertura';
  * 4. Al confirmar, la vista cambia automáticamente a VistaCajaAbierta
  */
 export function VistaCajaCerrada() {
+  const { isOwner } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -40,25 +42,36 @@ export function VistaCajaCerrada() {
           operar, debes abrir una nueva sesión.
         </p>
 
-        {/* Botón Principal */}
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          className="w-full py-4 px-6 bg-red-600 hover:bg-red-700 text-white text-lg font-semibold rounded-lg shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300"
-        >
-          <div className="flex items-center justify-center gap-3">
-            <Coffee size={24} />
-            <span>Abrir Caja / Iniciar Turno</span>
-          </div>
-        </button>
+        {/* Botón Principal (solo dueño) */}
+        {isOwner ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="w-full py-4 px-6 bg-red-600 hover:bg-red-700 text-white text-lg font-semibold rounded-lg shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <Coffee size={24} />
+                <span>Abrir Caja / Iniciar Turno</span>
+              </div>
+            </button>
 
-        {/* Información Adicional */}
-        <div className="mt-8 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800">
-            <strong>Recuerda:</strong> Al abrir la caja, deberás ingresar el
-            monto inicial en efectivo con el que cuentas para comenzar el turno.
-          </p>
-        </div>
+            {/* Información Adicional */}
+            <div className="mt-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-800">
+                <strong>Recuerda:</strong> Al abrir la caja, deberás ingresar el
+                monto inicial en efectivo con el que cuentas para comenzar el turno.
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="mt-2 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              <strong>Acción restringida:</strong> Solo el dueño puede abrir la caja.
+              Avisale para que inicie el turno.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Modal de Apertura */}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Lock } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCaja } from '@/hooks/useCaja';
 import { useExportarCobros } from '@/hooks';
 import { KpisCaja } from './KpisCaja';
@@ -29,6 +30,7 @@ import { ModalCierre } from './ModalCierre';
  * - ModalCierre (para arqueo y cierre)
  */
 export function VistaCajaAbierta() {
+  const { isOwner } = useAuth();
   const {
     sesion,
     movimientos,
@@ -63,6 +65,7 @@ export function VistaCajaAbierta() {
         onRegistrarGasto={() => setIsGastoModalOpen(true)}
         onExportarCobros={exportarCobros}
         loadingExportacion={loadingExportacion}
+        isOwner={isOwner}
       />
 
       {/* Sección 3: Tabla de Movimientos */}
@@ -72,30 +75,32 @@ export function VistaCajaAbierta() {
         formatearHora={formatearHora}
       />
 
-      {/* Sección 4: Botón de Cierre (Destacado) */}
-      <div className="border-t-2 border-gray-200 pt-6">
-        <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-red-900 mb-1">
-                Finalizar Turno
-              </h3>
-              <p className="text-sm text-red-700">
-                Cierra la caja cuando termines tu turno. Deberás contar el
-                efectivo físicamente.
-              </p>
+      {/* Sección 4: Botón de Cierre (solo dueño) */}
+      {isOwner && (
+        <div className="border-t-2 border-gray-200 pt-6">
+          <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-red-900 mb-1">
+                  Finalizar Turno
+                </h3>
+                <p className="text-sm text-red-700">
+                  Cierra la caja cuando termines tu turno. Deberás contar el
+                  efectivo físicamente.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCierreModalOpen(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              >
+                <Lock size={20} />
+                <span>Cerrar Caja</span>
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsCierreModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-            >
-              <Lock size={20} />
-              <span>Cerrar Caja</span>
-            </button>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Modales */}
       <ModalRegistrarGasto

@@ -61,6 +61,19 @@ export class DetalleVentaResponseDto {
   detalles: DetalleItemDto[];
 
   @ApiProperty({
+    description: 'Usuario que registró la venta',
+    required: false,
+    example: {
+      id: 'uuid-usuario',
+      nombre: 'Carlos López',
+    },
+  })
+  usuario?: {
+    id: string;
+    nombre: string;
+  };
+
+  @ApiProperty({
     type: [Object],
     description: 'Historial de cobros realizados',
     example: [

@@ -26,6 +26,9 @@ import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UsuarioRol } from '../../tenant/entities/usuario.entity';
 
 /**
  * CONTROLLER DE CATEGORÍAS
@@ -42,7 +45,7 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
  */
 @ApiTags('Categorías')
 @Controller('categorias')
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 @ApiBearerAuth('JWT-auth')
 export class CategoriasController {
   constructor(private readonly categoriasService: CategoriasService) {}
@@ -51,6 +54,7 @@ export class CategoriasController {
    * CREAR CATEGORÍA
    */
   @Post()
+  @Roles(UsuarioRol.DUENO)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear nueva categoría',
@@ -203,6 +207,7 @@ export class CategoriasController {
    * ACTUALIZAR CATEGORÍA
    */
   @Put(':id')
+  @Roles(UsuarioRol.DUENO)
   @ApiOperation({
     summary: 'Actualizar categoría',
     description: 'Actualiza los datos de una categoría existente.',
@@ -232,6 +237,7 @@ export class CategoriasController {
    * ELIMINAR CATEGORÍA (SOFT DELETE)
    */
   @Delete(':id')
+  @Roles(UsuarioRol.DUENO)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Eliminar categoría (soft delete)',
@@ -261,6 +267,7 @@ export class CategoriasController {
    * RESTAURAR CATEGORÍA ELIMINADA
    */
   @Post(':id/restore')
+  @Roles(UsuarioRol.DUENO)
   @ApiOperation({
     summary: 'Restaurar categoría eliminada',
     description: 'Restaura una categoría marcada como eliminada.',

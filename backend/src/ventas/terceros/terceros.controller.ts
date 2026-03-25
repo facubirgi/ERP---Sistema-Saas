@@ -20,6 +20,9 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UsuarioRol } from '../../tenant/entities/usuario.entity';
 import { TercerosService } from './terceros.service';
 import { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 
@@ -52,7 +55,7 @@ import {
  * - El empresaId se extrae automáticamente del token JWT
  */
 @Controller('terceros')
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 @ApiBearerAuth('JWT-auth')
 @ApiTags('Terceros')
 export class TercerosController {
@@ -91,7 +94,8 @@ export class TercerosController {
     @Body() dto: CrearTerceroDto,
     @Request() req: RequestWithUser,
   ): Promise<TerceroResponseDto> {
-    return this.tercerosService.crear(dto, req.user.empresaId);
+    const { empresaId, userId } = req.user;
+    return this.tercerosService.crear(dto, empresaId, userId);
   }
 
   /**

@@ -10,6 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Empresa } from '../../tenant/entities/empresa.entity';
+import { Usuario } from '../../tenant/entities/usuario.entity';
 import { TipoTercero } from '../enums';
 import { Comprobante } from './comprobante.entity';
 
@@ -83,6 +84,14 @@ export class Tercero {
   @ManyToOne(() => Empresa, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'empresa_id' })
   empresa: Empresa;
+
+  // RELACIÓN CON USUARIO QUE LO CREÓ
+  @Column({ type: 'uuid', nullable: true, name: 'usuario_id' })
+  usuarioId: string | null;
+
+  @ManyToOne(() => Usuario, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'usuario_id' })
+  usuario: Usuario | null;
 
   // RELACIÓN CON COMPROBANTES
   @OneToMany(() => Comprobante, (comprobante) => comprobante.tercero)

@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Plus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useInventario } from '@/contexts/InventarioContext';
 import { useNotifications } from '@/contexts/NotificationContext';
 import { SearchBar, ConfirmDialog } from '@/components/common';
@@ -15,6 +16,7 @@ import { CATEGORIA_VALIDATION } from '@/lib/utils/inventario.constants';
 import type { Categoria, CreateCategoriaDto, UpdateCategoriaDto, PaginatedResponse } from '@/lib/types/inventario.types';
 
 export function CategoriasView() {
+  const { isOwner } = useAuth();
   const {
     fetchCategorias,
     createCategoria,
@@ -208,13 +210,15 @@ export function CategoriasView() {
               Gestiona las categorías de productos de tu inventario
             </p>
           </div>
-          <button
-            onClick={handleCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <Plus size={20} />
-            Nueva Categoría
-          </button>
+          {isOwner && (
+            <button
+              onClick={handleCreate}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Plus size={20} />
+              Nueva Categoría
+            </button>
+          )}
         </div>
 
         {/* Búsqueda */}
@@ -233,6 +237,7 @@ export function CategoriasView() {
           onPageChange={handlePageChange}
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
+          isOwner={isOwner}
         />
       </div>
 

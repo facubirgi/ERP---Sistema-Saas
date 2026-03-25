@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  BadRequestException,
   Inject,
   Scope,
 } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { Empresa } from './entities/empresa.entity';
 import { Usuario, UsuarioRol } from './entities/usuario.entity';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
+import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 
 /**
  * TENANT SERVICE
@@ -199,5 +201,118 @@ export class TenantService {
     hashedPassword: string,
   ): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
+  }
+
+  /**
+   * Listar todos los usuarios de la empresa
+   */
+  async listarUsuarios(empresaId: string): Promise<Usuario[]> {
+    return this.usuarioRepository.find({
+      where: { empresaId },
+      order: { createdAt: 'DESC' },
+      select: ['id', 'empresaId', 'nombre', 'email', 'rol', 'activo', 'createdAt'],
+    });
+  }
+
+  /**
+   * Actualizar usuario (solo nombre y email)
+   */
+  async actualizarUsuario(
+    id: string,
+    dto: UpdateUsuarioDto,
+    empresaId: string,
+  ): Promise<Usuario> {
+    const usuario = await this.findUsuarioById(id, empresaId);
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    if (dto.email && dto.email !== usuario.email) {
+      const existente = await this.usuarioRepository.findOne({
+        where: { empresaId, email: dto.email },
+      });
+
+      if (existente) {
+        throw new ConflictException('El email ya está en uso en esta empresa');
+      }
+    }
+
+    Object.assign(usuario, dto);
+    return this.usuarioRepository.save(usuario);
+  }
+
+  /**
+   * Cambiar contraseña de un usuario
+   */
+  async cambiarPassword(
+    id: string,
+    nuevaPassword: string,
+    empresaId: string,
+  ): Promise<void> {
+    const usuario = await this.findUsuarioById(id, empresaId);
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const passwordHash = await bcrypt.hash(nuevaPassword, 10);
+    await this.usuarioRepository.update(id, { passwordHash });
+  }
+
+  /**
+   * Activar/Desactivar usuario
+   */
+  async toggleActivoUsuario(
+    id: string,
+    empresaId: string,
+  ): Promise<Usuario> {
+    const usuario = await this.findUsuarioById(id, empresaId);
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    if (usuario.rol === UsuarioRol.DUENO && usuario.activo) {
+      const countDuenosActivos = await this.usuarioRepository.count({
+        where: {
+          empresaId,
+          rol: UsuarioRol.DUENO,
+          activo: true,
+        },
+      });
+
+      if (countDuenosActivos <= 1) {
+        throw new BadRequestException(
+          'No se puede desactivar al único dueño activo de la empresa',
+        );
+      }
+    }
+
+    usuario.activo = !usuario.activo;
+    return this.usuarioRepository.save(usuario);
+  }
+
+  /**
+   * Contar usuarios activos por rol
+   */
+  async contarUsuariosPorRol(empresaId: string): Promise<{
+    totalActivos: number;
+    duenos: number;
+    empleados: number;
+  }> {
+    const [duenos, empleados, totalActivos] = await Promise.all([
+      this.usuarioRepository.count({
+        where: { empresaId, rol: UsuarioRol.DUENO, activo: true },
+      }),
+      this.usuarioRepository.count({
+        where: { empresaId, rol: UsuarioRol.EMPLEADO, activo: true },
+      }),
+      this.usuarioRepository.count({
+        where: { empresaId, activo: true },
+      }),
+    ]);
+
+    return { totalActivos, duenos, empleados };
   }
 }

@@ -22,6 +22,9 @@ import { CajaService } from './caja.service';
 import { AbrirCajaDto, CerrarCajaDto, CrearMovimientoDto } from './dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../common/guards/tenant.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UsuarioRol } from '../tenant/entities/usuario.entity';
 
 /**
  * CONTROLLER DE CAJA (TESORERÍA)
@@ -38,7 +41,7 @@ import { TenantGuard } from '../common/guards/tenant.guard';
  */
 @ApiTags('Caja')
 @Controller('caja')
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 @ApiBearerAuth('JWT-auth')
 export class CajaController {
   constructor(private readonly cajaService: CajaService) {}
@@ -47,6 +50,7 @@ export class CajaController {
    * ABRIR CAJA
    */
   @Post('abrir')
+  @Roles(UsuarioRol.DUENO)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Abrir sesión de caja',
@@ -112,6 +116,7 @@ export class CajaController {
    * CERRAR CAJA
    */
   @Post(':id/cerrar')
+  @Roles(UsuarioRol.DUENO)
   @ApiOperation({
     summary: 'Cerrar sesión de caja',
     description:

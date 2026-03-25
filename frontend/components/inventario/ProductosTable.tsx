@@ -18,6 +18,7 @@ interface ProductosTableProps {
   onEdit: (producto: Producto) => void;
   onDelete: (producto: Producto) => void;
   calcularMargen: (costo: number, venta: number) => number;
+  isOwner?: boolean;
 }
 
 export function ProductosTable({
@@ -29,6 +30,7 @@ export function ProductosTable({
   onEdit,
   onDelete,
   calcularMargen,
+  isOwner = false,
 }: ProductosTableProps) {
   const columns: Column<Producto>[] = [
     {
@@ -90,20 +92,24 @@ export function ProductosTable({
           >
             <Eye size={18} />
           </button>
-          <button
-            onClick={() => onEdit(prod)}
-            className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
-            title="Editar"
-          >
-            <Edit size={18} />
-          </button>
-          <button
-            onClick={() => onDelete(prod)}
-            className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
-            title="Eliminar"
-          >
-            <Trash2 size={18} />
-          </button>
+          {isOwner && (
+            <>
+              <button
+                onClick={() => onEdit(prod)}
+                className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
+                title="Editar"
+              >
+                <Edit size={18} />
+              </button>
+              <button
+                onClick={() => onDelete(prod)}
+                className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
+                title="Eliminar"
+              >
+                <Trash2 size={18} />
+              </button>
+            </>
+          )}
         </div>
       ),
     },

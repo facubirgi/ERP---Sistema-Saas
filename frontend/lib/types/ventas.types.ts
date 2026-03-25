@@ -355,6 +355,10 @@ export interface VentaListItemDto {
     id: string;
     nombre: string;
   };
+  usuario?: {
+    id: string;
+    nombre: string;
+  };
   cantidadItems: number;
   createdAt: Date;
 }
@@ -371,6 +375,7 @@ export interface TerceroResponseDto {
   saldoActual: number;
   createdAt: Date;
   updatedAt: Date;
+  usuario?: { id: string; nombre: string } | null;
 }
 
 // ============================================================================

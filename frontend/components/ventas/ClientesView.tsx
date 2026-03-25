@@ -5,7 +5,7 @@
 // ============================================================================
 
 import { useState, useEffect } from 'react';
-import { Users, Search, Plus, MapPin, Edit, UserCheck, Truck } from 'lucide-react';
+import { Users, Search, Plus, MapPin, Edit, UserCheck, Truck, UserCircle } from 'lucide-react';
 import { useVentas } from '@/contexts/VentasContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TipoTercero, type TerceroResponseDto } from '@/lib/types/ventas.types';
@@ -196,7 +196,7 @@ export function ClientesView() {
                   </div>
                 )}
 
-                <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="border-t border-gray-200 pt-4 mt-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Saldo pendiente</span>
                     <span
@@ -206,6 +206,10 @@ export function ClientesView() {
                     >
                       {formatCurrency(cliente.saldoActual)}
                     </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <UserCircle size={13} />
+                    <span>{cliente.usuario?.nombre || 'Sin asignar'}</span>
                   </div>
                 </div>
               </div>

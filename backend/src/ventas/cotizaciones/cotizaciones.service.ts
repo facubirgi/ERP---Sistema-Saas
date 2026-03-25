@@ -333,6 +333,7 @@ export class CotizacionesService {
     cotizacionId: string,
     dto: GenerarVentaDesdeCotizacionDto,
     empresaId: string,
+    usuarioId?: string,
   ): Promise<VentaResponseDto> {
     // Obtener cotización con sus detalles
     const cotizacion = await this.comprobanteRepo.findOne({
@@ -386,6 +387,7 @@ export class CotizacionesService {
     const ventaResponse = await this.ventasService.crearVenta(
       crearVentaDto,
       empresaId,
+      usuarioId,
     );
 
     // Marcar la cotización como convertida a venta

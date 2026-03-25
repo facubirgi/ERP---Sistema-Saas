@@ -105,6 +105,7 @@ export class VentasService {
   async crearVenta(
     dto: CrearVentaDto,
     empresaId: string,
+    usuarioId?: string,
   ): Promise<VentaResponseDto> {
     // A. Calcular total de la venta
     const total = dto.items.reduce(
@@ -169,6 +170,7 @@ export class VentasService {
         saldoPendiente: saldoPendienteRedondeado,
         estadoPago,
         terceroId: dto.clienteId || null,
+        usuarioId: usuarioId || null,
         empresaId,
       });
 
@@ -543,7 +545,7 @@ export class VentasService {
   ): Promise<DetalleVentaResponseDto> {
     const comprobante = await this.comprobanteRepository.findOne({
       where: { id, empresaId, eliminado: false },
-      relations: ['tercero', 'detalles', 'detalles.producto', 'cobros'],
+      relations: ['tercero', 'detalles', 'detalles.producto', 'cobros', 'usuario'],
       order: {
         detalles: { createdAt: 'ASC' },
         cobros: { fecha: 'ASC' },
@@ -564,6 +566,12 @@ export class VentasService {
         ? {
             id: comprobante.tercero.id,
             nombre: comprobante.tercero.nombre,
+          }
+        : undefined,
+      usuario: comprobante.usuario
+        ? {
+            id: comprobante.usuario.id,
+            nombre: comprobante.usuario.nombre,
           }
         : undefined,
       detalles: comprobante.detalles.map((d) => ({
@@ -774,7 +782,7 @@ export class VentasService {
     // D. Buscar comprobantes con filtros aplicados
     const comprobantes = await this.comprobanteRepository.find({
       where,
-      relations: ['tercero', 'detalles'],
+      relations: ['tercero', 'detalles', 'usuario'],
       order: { createdAt: 'DESC' }, // Más recientes primero
     });
 
@@ -792,6 +800,12 @@ export class VentasService {
           }
         : undefined,
       cantidadItems: c.detalles?.length || 0,
+      usuario: c.usuario
+        ? {
+            id: c.usuario.id,
+            nombre: c.usuario.nombre,
+          }
+        : undefined,
       createdAt: c.createdAt,
     }));
   }
@@ -836,7 +850,7 @@ export class VentasService {
         empresaId,
         fecha: Between(fechaAperturaCaja, fechaConsulta) as any,
       },
-      relations: ['comprobante', 'comprobante.tercero'],
+      relations: ['comprobante', 'comprobante.tercero', 'comprobante.usuario'],
       order: { fecha: 'ASC' }, // Ordenar cronológicamente
     });
 
@@ -852,6 +866,9 @@ export class VentasService {
       },
       cliente: cobro.comprobante.tercero
         ? { nombre: cobro.comprobante.tercero.nombre }
+        : null,
+      usuario: cobro.comprobante.usuario
+        ? { id: cobro.comprobante.usuario.id, nombre: cobro.comprobante.usuario.nombre }
         : null,
     }));
 

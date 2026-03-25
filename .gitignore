@@ -99,6 +99,18 @@ docker-compose.override.yml
 .claude/
 
 # ==========================================
+# ROOT FILES (Ignorar todo excepto README.md, frontend/ y backend/)
+# ==========================================
+/CHANGELOG.md
+/CONTRIBUTING.md
+/docker-compose.yml
+/LICENSE
+/package.json
+/verificar-deploy.js
+/fase del desarrollo/
+/scripts/
+
+# ==========================================
 # DOCUMENTACIÓN DEL PROYECTO
 # ==========================================
 .env.example

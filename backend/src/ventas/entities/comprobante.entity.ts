@@ -10,6 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Empresa } from '../../tenant/entities/empresa.entity';
+import { Usuario } from '../../tenant/entities/usuario.entity';
 import { TipoComprobante, EstadoPago } from '../enums';
 import { Tercero } from './tercero.entity';
 import { Cobro } from './cobro.entity';
@@ -181,6 +182,19 @@ export class Comprobante {
   @ManyToOne(() => Empresa, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'empresa_id' })
   empresa: Empresa;
+
+  // RELACIÓN CON USUARIO EMISOR
+  /**
+   * Usuario que registró la venta en el sistema.
+   * - Para VENTA: se registra automáticamente desde el JWT
+   * - onDelete: SET NULL (si se elimina el usuario, la venta permanece)
+   */
+  @Column({ type: 'uuid', nullable: true, name: 'usuario_id' })
+  usuarioId: string | null;
+
+  @ManyToOne(() => Usuario, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'usuario_id' })
+  usuario: Usuario | null;
 
   // RELACIÓN CON COBROS
   /**

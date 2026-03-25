@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../common/guards/tenant.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
 import { VentasService } from './ventas.service';
 import { AuthenticatedUser } from '../auth/interfaces/jwt-payload.interface';
 
@@ -61,7 +62,7 @@ import {
  * - El empresaId se extrae automáticamente del token JWT
  */
 @Controller('ventas')
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 @ApiBearerAuth('JWT-auth')
 @ApiTags('Ventas y Cobros')
 export class VentasController {
@@ -104,8 +105,8 @@ export class VentasController {
     @Body() crearVentaDto: CrearVentaDto,
     @Request() req: RequestWithUser,
   ): Promise<VentaResponseDto> {
-    const empresaId = req.user.empresaId;
-    return this.ventasService.crearVenta(crearVentaDto, empresaId);
+    const { empresaId, userId } = req.user;
+    return this.ventasService.crearVenta(crearVentaDto, empresaId, userId);
   }
 
   /**

@@ -53,6 +53,17 @@ export class CobroExportDto {
   cliente: {
     nombre: string;
   } | null;
+
+  @ApiProperty({
+    description: 'Usuario que registró la venta',
+    example: { id: '550e8400-e29b-41d4-a716-446655440000', nombre: 'Carlos López' },
+    nullable: true,
+    required: false,
+  })
+  usuario?: {
+    id: string;
+    nombre: string;
+  } | null;
 }
 
 /**

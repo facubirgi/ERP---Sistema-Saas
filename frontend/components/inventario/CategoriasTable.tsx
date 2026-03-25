@@ -14,6 +14,7 @@ interface CategoriasTableProps {
   onPageChange: (page: number) => void;
   onEdit: (categoria: Categoria) => void;
   onDelete: (categoria: Categoria) => void;
+  isOwner?: boolean;
 }
 
 export function CategoriasTable({
@@ -22,6 +23,7 @@ export function CategoriasTable({
   onPageChange,
   onEdit,
   onDelete,
+  isOwner = false,
 }: CategoriasTableProps) {
   const columns: Column<Categoria>[] = [
     {
@@ -55,20 +57,24 @@ export function CategoriasTable({
       className: 'text-right',
       render: (cat) => (
         <div className="flex items-center justify-end gap-2">
-          <button
-            onClick={() => onEdit(cat)}
-            className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
-            title="Editar"
-          >
-            <Edit size={18} />
-          </button>
-          <button
-            onClick={() => onDelete(cat)}
-            className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
-            title="Eliminar"
-          >
-            <Trash2 size={18} />
-          </button>
+          {isOwner && (
+            <>
+              <button
+                onClick={() => onEdit(cat)}
+                className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
+                title="Editar"
+              >
+                <Edit size={18} />
+              </button>
+              <button
+                onClick={() => onDelete(cat)}
+                className="p-2 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 hover:scale-110"
+                title="Eliminar"
+              >
+                <Trash2 size={18} />
+              </button>
+            </>
+          )}
         </div>
       ),
     },

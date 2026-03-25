@@ -17,7 +17,7 @@ import { calcularMargen } from '@/lib/utils/producto.utils';
 import type { Producto } from '@/lib/types/inventario.types';
 
 export function ProductosView() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, isOwner } = useAuth();
 
   // Hooks personalizados
   const {
@@ -124,13 +124,15 @@ export function ProductosView() {
               Gestiona todos los productos de tu inventario
             </p>
           </div>
-          <button
-            onClick={handleCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            <Plus size={20} />
-            Nuevo Producto
-          </button>
+          {isOwner && (
+            <button
+              onClick={handleCreate}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Plus size={20} />
+              Nuevo Producto
+            </button>
+          )}
         </div>
 
         {/* Búsqueda */}
@@ -152,6 +154,7 @@ export function ProductosView() {
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
           calcularMargen={calcularMargen}
+          isOwner={isOwner}
         />
       </div>
 
