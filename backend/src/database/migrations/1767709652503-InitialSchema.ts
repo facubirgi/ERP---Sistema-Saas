@@ -7,20 +7,20 @@ export class InitialSchema1767709652503 implements MigrationInterface {
         // 1. Habilitar extensión UUID
         await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
 
-        // 2. Crear ENUMs
-        await queryRunner.query(`CREATE TYPE "public"."usuario_rol_enum" AS ENUM('DUEÑO', 'EMPLEADO')`);
-        await queryRunner.query(`CREATE TYPE "public"."tercero_tipo_enum" AS ENUM('CLIENTE', 'PROVEEDOR')`);
-        await queryRunner.query(`CREATE TYPE "public"."comprobante_tipo_enum" AS ENUM('VENTA', 'COTIZACION')`);
-        await queryRunner.query(`CREATE TYPE "public"."comprobante_estado_pago_enum" AS ENUM('PENDIENTE', 'PARCIAL', 'PAGADO')`);
-        await queryRunner.query(`CREATE TYPE "public"."cobro_metodo_enum" AS ENUM('EFECTIVO', 'QR', 'TARJETA', 'TRANSFERENCIA')`);
-        await queryRunner.query(`CREATE TYPE "public"."caja_sesion_estado_enum" AS ENUM('ABIERTA', 'CERRADA')`);
-        await queryRunner.query(`CREATE TYPE "public"."movimiento_caja_tipo_enum" AS ENUM('INGRESO', 'EGRESO')`);
-        await queryRunner.query(`CREATE TYPE "public"."movimiento_caja_origen_enum" AS ENUM('APERTURA', 'VENTA', 'GASTO', 'RETIRO', 'DEPOSITO', 'DEVOLUCION', 'AJUSTE')`);
-        await queryRunner.query(`CREATE TYPE "public"."movimiento_caja_metodo_pago_enum" AS ENUM('EFECTIVO', 'QR', 'TRANSFERENCIA', 'OTRO')`);
+        // 2. Crear ENUMs (idempotente)
+        await queryRunner.query(`DO $$ BEGIN CREATE TYPE "public"."usuario_rol_enum" AS ENUM('DUEÑO', 'EMPLEADO'); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+        await queryRunner.query(`DO $$ BEGIN CREATE TYPE "public"."tercero_tipo_enum" AS ENUM('CLIENTE', 'PROVEEDOR'); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+        await queryRunner.query(`DO $$ BEGIN CREATE TYPE "public"."comprobante_tipo_enum" AS ENUM('VENTA', 'COTIZACION'); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+        await queryRunner.query(`DO $$ BEGIN CREATE TYPE "public"."comprobante_estado_pago_enum" AS ENUM('PENDIENTE', 'PARCIAL', 'PAGADO'); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+        await queryRunner.query(`DO $$ BEGIN CREATE TYPE "public"."cobro_metodo_enum" AS ENUM('EFECTIVO', 'QR', 'TARJETA', 'TRANSFERENCIA'); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+        await queryRunner.query(`DO $$ BEGIN CREATE TYPE "public"."caja_sesion_estado_enum" AS ENUM('ABIERTA', 'CERRADA'); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+        await queryRunner.query(`DO $$ BEGIN CREATE TYPE "public"."movimiento_caja_tipo_enum" AS ENUM('INGRESO', 'EGRESO'); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+        await queryRunner.query(`DO $$ BEGIN CREATE TYPE "public"."movimiento_caja_origen_enum" AS ENUM('APERTURA', 'VENTA', 'GASTO', 'RETIRO', 'DEPOSITO', 'DEVOLUCION', 'AJUSTE'); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+        await queryRunner.query(`DO $$ BEGIN CREATE TYPE "public"."movimiento_caja_metodo_pago_enum" AS ENUM('EFECTIVO', 'QR', 'TRANSFERENCIA', 'OTRO'); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // 3. Crear tabla EMPRESA
         await queryRunner.query(`
-            CREATE TABLE "empresa" (
+            CREATE TABLE IF NOT EXISTS "empresa" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "razon_social" character varying(255) NOT NULL,
                 "cuit" character varying(20),
@@ -38,7 +38,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
 
         // 4. Crear tabla USUARIO
         await queryRunner.query(`
-            CREATE TABLE "usuario" (
+            CREATE TABLE IF NOT EXISTS "usuario" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "empresa_id" uuid NOT NULL,
                 "nombre" character varying(255) NOT NULL,
@@ -54,7 +54,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
 
         // 5. Crear tabla CATEGORIA
         await queryRunner.query(`
-            CREATE TABLE "categoria" (
+            CREATE TABLE IF NOT EXISTS "categoria" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "nombre" character varying(100) NOT NULL,
                 "empresa_id" uuid NOT NULL,
@@ -68,7 +68,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
 
         // 6. Crear tabla PRODUCTO
         await queryRunner.query(`
-            CREATE TABLE "producto" (
+            CREATE TABLE IF NOT EXISTS "producto" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "codigo_barras" character varying(50),
                 "nombre" character varying(200) NOT NULL,
@@ -88,7 +88,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
 
         // 7. Crear tabla TERCERO
         await queryRunner.query(`
-            CREATE TABLE "tercero" (
+            CREATE TABLE IF NOT EXISTS "tercero" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "nombre" character varying(200) NOT NULL,
                 "direccion" character varying(300),
@@ -106,7 +106,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
 
         // 8. Crear tabla COMPROBANTE
         await queryRunner.query(`
-            CREATE TABLE "comprobante" (
+            CREATE TABLE IF NOT EXISTS "comprobante" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "tipo" "public"."comprobante_tipo_enum" NOT NULL,
                 "numero_comprobante" character varying(50),
@@ -130,7 +130,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
 
         // 9. Crear tabla COMPROBANTE_DETALLE
         await queryRunner.query(`
-            CREATE TABLE "comprobante_detalle" (
+            CREATE TABLE IF NOT EXISTS "comprobante_detalle" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "comprobante_id" uuid NOT NULL,
                 "producto_id" uuid NOT NULL,
@@ -147,7 +147,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
 
         // 10. Crear tabla COBRO
         await queryRunner.query(`
-            CREATE TABLE "cobro" (
+            CREATE TABLE IF NOT EXISTS "cobro" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "monto" numeric(12,2) NOT NULL,
                 "fecha" TIMESTAMP NOT NULL,
@@ -162,7 +162,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
 
         // 11. Crear tabla CAJA_SESION
         await queryRunner.query(`
-            CREATE TABLE "caja_sesion" (
+            CREATE TABLE IF NOT EXISTS "caja_sesion" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "fecha_apertura" TIMESTAMP NOT NULL,
                 "fecha_cierre" TIMESTAMP,
@@ -181,7 +181,7 @@ export class InitialSchema1767709652503 implements MigrationInterface {
 
         // 12. Crear tabla MOVIMIENTO_CAJA
         await queryRunner.query(`
-            CREATE TABLE "movimiento_caja" (
+            CREATE TABLE IF NOT EXISTS "movimiento_caja" (
                 "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                 "sesion_id" uuid NOT NULL,
                 "fecha" TIMESTAMP NOT NULL,
@@ -196,226 +196,118 @@ export class InitialSchema1767709652503 implements MigrationInterface {
             )
         `);
 
-        // 13. Crear FOREIGN KEYS
+        // 13. Crear FOREIGN KEYS (idempotente)
 
         // Usuario -> Empresa
-        await queryRunner.query(`
-            ALTER TABLE "usuario"
-            ADD CONSTRAINT "FK_usuario_empresa"
-            FOREIGN KEY ("empresa_id")
-            REFERENCES "empresa"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "usuario" ADD CONSTRAINT "FK_usuario_empresa" FOREIGN KEY ("empresa_id") REFERENCES "empresa"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Categoria -> Empresa
-        await queryRunner.query(`
-            ALTER TABLE "categoria"
-            ADD CONSTRAINT "FK_categoria_empresa"
-            FOREIGN KEY ("empresa_id")
-            REFERENCES "empresa"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "categoria" ADD CONSTRAINT "FK_categoria_empresa" FOREIGN KEY ("empresa_id") REFERENCES "empresa"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Producto -> Categoria
-        await queryRunner.query(`
-            ALTER TABLE "producto"
-            ADD CONSTRAINT "FK_producto_categoria"
-            FOREIGN KEY ("categoria_id")
-            REFERENCES "categoria"("id")
-            ON DELETE RESTRICT ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "producto" ADD CONSTRAINT "FK_producto_categoria" FOREIGN KEY ("categoria_id") REFERENCES "categoria"("id") ON DELETE RESTRICT ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Producto -> Empresa
-        await queryRunner.query(`
-            ALTER TABLE "producto"
-            ADD CONSTRAINT "FK_producto_empresa"
-            FOREIGN KEY ("empresa_id")
-            REFERENCES "empresa"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "producto" ADD CONSTRAINT "FK_producto_empresa" FOREIGN KEY ("empresa_id") REFERENCES "empresa"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Tercero -> Empresa
-        await queryRunner.query(`
-            ALTER TABLE "tercero"
-            ADD CONSTRAINT "FK_tercero_empresa"
-            FOREIGN KEY ("empresa_id")
-            REFERENCES "empresa"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "tercero" ADD CONSTRAINT "FK_tercero_empresa" FOREIGN KEY ("empresa_id") REFERENCES "empresa"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Tercero -> Usuario (SET NULL)
-        await queryRunner.query(`
-            ALTER TABLE "tercero"
-            ADD CONSTRAINT "FK_tercero_usuario"
-            FOREIGN KEY ("usuario_id")
-            REFERENCES "usuario"("id")
-            ON DELETE SET NULL ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "tercero" ADD CONSTRAINT "FK_tercero_usuario" FOREIGN KEY ("usuario_id") REFERENCES "usuario"("id") ON DELETE SET NULL ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Comprobante -> Tercero (SET NULL)
-        await queryRunner.query(`
-            ALTER TABLE "comprobante"
-            ADD CONSTRAINT "FK_comprobante_tercero"
-            FOREIGN KEY ("tercero_id")
-            REFERENCES "tercero"("id")
-            ON DELETE SET NULL ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "comprobante" ADD CONSTRAINT "FK_comprobante_tercero" FOREIGN KEY ("tercero_id") REFERENCES "tercero"("id") ON DELETE SET NULL ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Comprobante -> Empresa
-        await queryRunner.query(`
-            ALTER TABLE "comprobante"
-            ADD CONSTRAINT "FK_comprobante_empresa"
-            FOREIGN KEY ("empresa_id")
-            REFERENCES "empresa"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "comprobante" ADD CONSTRAINT "FK_comprobante_empresa" FOREIGN KEY ("empresa_id") REFERENCES "empresa"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Comprobante -> Usuario (SET NULL)
-        await queryRunner.query(`
-            ALTER TABLE "comprobante"
-            ADD CONSTRAINT "FK_comprobante_usuario"
-            FOREIGN KEY ("usuario_id")
-            REFERENCES "usuario"("id")
-            ON DELETE SET NULL ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "comprobante" ADD CONSTRAINT "FK_comprobante_usuario" FOREIGN KEY ("usuario_id") REFERENCES "usuario"("id") ON DELETE SET NULL ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // ComprobanteDetalle -> Comprobante
-        await queryRunner.query(`
-            ALTER TABLE "comprobante_detalle"
-            ADD CONSTRAINT "FK_comprobante_detalle_comprobante"
-            FOREIGN KEY ("comprobante_id")
-            REFERENCES "comprobante"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "comprobante_detalle" ADD CONSTRAINT "FK_comprobante_detalle_comprobante" FOREIGN KEY ("comprobante_id") REFERENCES "comprobante"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // ComprobanteDetalle -> Producto
-        await queryRunner.query(`
-            ALTER TABLE "comprobante_detalle"
-            ADD CONSTRAINT "FK_comprobante_detalle_producto"
-            FOREIGN KEY ("producto_id")
-            REFERENCES "producto"("id")
-            ON DELETE RESTRICT ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "comprobante_detalle" ADD CONSTRAINT "FK_comprobante_detalle_producto" FOREIGN KEY ("producto_id") REFERENCES "producto"("id") ON DELETE RESTRICT ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // ComprobanteDetalle -> Empresa
-        await queryRunner.query(`
-            ALTER TABLE "comprobante_detalle"
-            ADD CONSTRAINT "FK_comprobante_detalle_empresa"
-            FOREIGN KEY ("empresa_id")
-            REFERENCES "empresa"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "comprobante_detalle" ADD CONSTRAINT "FK_comprobante_detalle_empresa" FOREIGN KEY ("empresa_id") REFERENCES "empresa"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Cobro -> Comprobante
-        await queryRunner.query(`
-            ALTER TABLE "cobro"
-            ADD CONSTRAINT "FK_cobro_comprobante"
-            FOREIGN KEY ("comprobante_id")
-            REFERENCES "comprobante"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "cobro" ADD CONSTRAINT "FK_cobro_comprobante" FOREIGN KEY ("comprobante_id") REFERENCES "comprobante"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // Cobro -> Empresa
-        await queryRunner.query(`
-            ALTER TABLE "cobro"
-            ADD CONSTRAINT "FK_cobro_empresa"
-            FOREIGN KEY ("empresa_id")
-            REFERENCES "empresa"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "cobro" ADD CONSTRAINT "FK_cobro_empresa" FOREIGN KEY ("empresa_id") REFERENCES "empresa"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // CajaSesion -> Usuario (SET NULL)
-        await queryRunner.query(`
-            ALTER TABLE "caja_sesion"
-            ADD CONSTRAINT "FK_caja_sesion_usuario"
-            FOREIGN KEY ("usuario_id")
-            REFERENCES "usuario"("id")
-            ON DELETE SET NULL ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "caja_sesion" ADD CONSTRAINT "FK_caja_sesion_usuario" FOREIGN KEY ("usuario_id") REFERENCES "usuario"("id") ON DELETE SET NULL ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // CajaSesion -> Empresa
-        await queryRunner.query(`
-            ALTER TABLE "caja_sesion"
-            ADD CONSTRAINT "FK_caja_sesion_empresa"
-            FOREIGN KEY ("empresa_id")
-            REFERENCES "empresa"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "caja_sesion" ADD CONSTRAINT "FK_caja_sesion_empresa" FOREIGN KEY ("empresa_id") REFERENCES "empresa"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // MovimientoCaja -> CajaSesion
-        await queryRunner.query(`
-            ALTER TABLE "movimiento_caja"
-            ADD CONSTRAINT "FK_movimiento_caja_sesion"
-            FOREIGN KEY ("sesion_id")
-            REFERENCES "caja_sesion"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "movimiento_caja" ADD CONSTRAINT "FK_movimiento_caja_sesion" FOREIGN KEY ("sesion_id") REFERENCES "caja_sesion"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
         // MovimientoCaja -> Empresa
-        await queryRunner.query(`
-            ALTER TABLE "movimiento_caja"
-            ADD CONSTRAINT "FK_movimiento_caja_empresa"
-            FOREIGN KEY ("empresa_id")
-            REFERENCES "empresa"("id")
-            ON DELETE CASCADE ON UPDATE NO ACTION
-        `);
+        await queryRunner.query(`DO $$ BEGIN ALTER TABLE "movimiento_caja" ADD CONSTRAINT "FK_movimiento_caja_empresa" FOREIGN KEY ("empresa_id") REFERENCES "empresa"("id") ON DELETE CASCADE ON UPDATE NO ACTION; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
-        // 14. Crear ÍNDICES
+        // 14. Crear ÍNDICES (idempotente)
 
         // Usuario
-        await queryRunner.query(`CREATE INDEX "IDX_usuario_empresa_id" ON "usuario" ("empresa_id") `);
-        await queryRunner.query(`CREATE UNIQUE INDEX "IDX_usuario_empresa_email" ON "usuario" ("empresa_id", "email") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_usuario_empresa_id" ON "usuario" ("empresa_id") `);
+        await queryRunner.query(`CREATE UNIQUE INDEX IF NOT EXISTS "IDX_usuario_empresa_email" ON "usuario" ("empresa_id", "email") `);
 
         // Categoria
-        await queryRunner.query(`CREATE INDEX "IDX_categoria_empresa_id" ON "categoria" ("empresa_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_categoria_empresa_eliminado" ON "categoria" ("empresa_id", "eliminado") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_categoria_empresa_id" ON "categoria" ("empresa_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_categoria_empresa_eliminado" ON "categoria" ("empresa_id", "eliminado") `);
 
         // Producto
         await queryRunner.query(`
-            CREATE UNIQUE INDEX "IDX_producto_empresa_codigo_barras"
+            CREATE UNIQUE INDEX IF NOT EXISTS "IDX_producto_empresa_codigo_barras"
             ON "producto" ("empresa_id", "codigo_barras")
             WHERE codigo_barras IS NOT NULL
         `);
-        await queryRunner.query(`CREATE INDEX "IDX_producto_empresa_id" ON "producto" ("empresa_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_producto_empresa_categoria" ON "producto" ("empresa_id", "categoria_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_producto_empresa_nombre" ON "producto" ("empresa_id", "nombre") `);
-        await queryRunner.query(`CREATE INDEX "IDX_producto_empresa_stock" ON "producto" ("empresa_id", "stock_actual") `);
-        await queryRunner.query(`CREATE INDEX "IDX_producto_empresa_eliminado" ON "producto" ("empresa_id", "eliminado") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_producto_empresa_id" ON "producto" ("empresa_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_producto_empresa_categoria" ON "producto" ("empresa_id", "categoria_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_producto_empresa_nombre" ON "producto" ("empresa_id", "nombre") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_producto_empresa_stock" ON "producto" ("empresa_id", "stock_actual") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_producto_empresa_eliminado" ON "producto" ("empresa_id", "eliminado") `);
 
         // Tercero
-        await queryRunner.query(`CREATE INDEX "IDX_tercero_empresa_id" ON "tercero" ("empresa_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_tercero_empresa_eliminado" ON "tercero" ("empresa_id", "eliminado") `);
-        await queryRunner.query(`CREATE INDEX "IDX_tercero_empresa_tipo" ON "tercero" ("empresa_id", "tipo") `);
-        await queryRunner.query(`CREATE INDEX "IDX_tercero_usuario_id" ON "tercero" ("usuario_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_tercero_empresa_id" ON "tercero" ("empresa_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_tercero_empresa_eliminado" ON "tercero" ("empresa_id", "eliminado") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_tercero_empresa_tipo" ON "tercero" ("empresa_id", "tipo") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_tercero_usuario_id" ON "tercero" ("usuario_id") `);
 
         // Comprobante
-        await queryRunner.query(`CREATE INDEX "IDX_comprobante_empresa_id" ON "comprobante" ("empresa_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_comprobante_empresa_tipo" ON "comprobante" ("empresa_id", "tipo") `);
-        await queryRunner.query(`CREATE INDEX "IDX_comprobante_empresa_estado_pago" ON "comprobante" ("empresa_id", "estado_pago") `);
-        await queryRunner.query(`CREATE INDEX "IDX_comprobante_tercero_id" ON "comprobante" ("tercero_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_comprobante_usuario_id" ON "comprobante" ("usuario_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_comprobante_empresa_id" ON "comprobante" ("empresa_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_comprobante_empresa_tipo" ON "comprobante" ("empresa_id", "tipo") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_comprobante_empresa_estado_pago" ON "comprobante" ("empresa_id", "estado_pago") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_comprobante_tercero_id" ON "comprobante" ("tercero_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_comprobante_usuario_id" ON "comprobante" ("usuario_id") `);
 
         // ComprobanteDetalle
-        await queryRunner.query(`CREATE INDEX "IDX_comprobante_detalle_empresa_id" ON "comprobante_detalle" ("empresa_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_comprobante_detalle_comprobante" ON "comprobante_detalle" ("comprobante_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_comprobante_detalle_producto" ON "comprobante_detalle" ("producto_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_comprobante_detalle_empresa_producto" ON "comprobante_detalle" ("empresa_id", "producto_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_comprobante_detalle_empresa_id" ON "comprobante_detalle" ("empresa_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_comprobante_detalle_comprobante" ON "comprobante_detalle" ("comprobante_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_comprobante_detalle_producto" ON "comprobante_detalle" ("producto_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_comprobante_detalle_empresa_producto" ON "comprobante_detalle" ("empresa_id", "producto_id") `);
 
         // Cobro
-        await queryRunner.query(`CREATE INDEX "IDX_cobro_empresa_id" ON "cobro" ("empresa_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_cobro_comprobante" ON "cobro" ("comprobante_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_cobro_empresa_fecha" ON "cobro" ("empresa_id", "fecha") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_cobro_empresa_id" ON "cobro" ("empresa_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_cobro_comprobante" ON "cobro" ("comprobante_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_cobro_empresa_fecha" ON "cobro" ("empresa_id", "fecha") `);
 
         // CajaSesion
-        await queryRunner.query(`CREATE INDEX "IDX_caja_sesion_empresa_id" ON "caja_sesion" ("empresa_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_caja_sesion_empresa_estado" ON "caja_sesion" ("empresa_id", "estado") `);
-        await queryRunner.query(`CREATE INDEX "IDX_caja_sesion_empresa_fecha_apertura" ON "caja_sesion" ("empresa_id", "fecha_apertura") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_caja_sesion_empresa_id" ON "caja_sesion" ("empresa_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_caja_sesion_empresa_estado" ON "caja_sesion" ("empresa_id", "estado") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_caja_sesion_empresa_fecha_apertura" ON "caja_sesion" ("empresa_id", "fecha_apertura") `);
 
         // MovimientoCaja
-        await queryRunner.query(`CREATE INDEX "IDX_movimiento_caja_empresa_id" ON "movimiento_caja" ("empresa_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_movimiento_caja_sesion" ON "movimiento_caja" ("sesion_id") `);
-        await queryRunner.query(`CREATE INDEX "IDX_movimiento_caja_empresa_fecha" ON "movimiento_caja" ("empresa_id", "fecha") `);
-        await queryRunner.query(`CREATE INDEX "IDX_movimiento_caja_empresa_tipo" ON "movimiento_caja" ("empresa_id", "tipo") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_movimiento_caja_empresa_id" ON "movimiento_caja" ("empresa_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_movimiento_caja_sesion" ON "movimiento_caja" ("sesion_id") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_movimiento_caja_empresa_fecha" ON "movimiento_caja" ("empresa_id", "fecha") `);
+        await queryRunner.query(`CREATE INDEX IF NOT EXISTS "IDX_movimiento_caja_empresa_tipo" ON "movimiento_caja" ("empresa_id", "tipo") `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
