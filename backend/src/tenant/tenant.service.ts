@@ -75,7 +75,16 @@ export class TenantService {
 
     // Create empresa
     const empresa = this.empresaRepository.create(empresaDto);
-    const savedEmpresa = await this.empresaRepository.save(empresa);
+    let savedEmpresa: Empresa;
+    try {
+      savedEmpresa = await this.empresaRepository.save(empresa);
+    } catch (error) {
+      // Postgres unique constraint violation code: 23505
+      if ((error as any)?.code === '23505') {
+        throw new ConflictException('Email de empresa ya está registrado');
+      }
+      throw error;
+    }
 
     try {
       // Hash password
@@ -98,6 +107,9 @@ export class TenantService {
     } catch (error) {
       // Rollback: delete empresa if usuario creation fails
       await this.empresaRepository.delete(savedEmpresa.id);
+      if ((error as any)?.code === '23505') {
+        throw new ConflictException('Email de usuario ya está registrado');
+      }
       throw error;
     }
   }
