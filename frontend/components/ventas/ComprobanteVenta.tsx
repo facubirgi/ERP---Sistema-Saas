@@ -39,178 +39,182 @@ export const ComprobanteVenta = forwardRef<HTMLDivElement, ComprobanteVentaProps
       [MetodoPago.TRANSFERENCIA]: 'Transferencia',
     };
 
+    const baseStyle: React.CSSProperties = {
+      width: '72mm',
+      padding: '4mm',
+      fontFamily: "'Courier New', Courier, monospace",
+      fontSize: '10pt',
+      color: '#000',
+      background: '#fff',
+      boxSizing: 'border-box',
+    };
+
+    const headerStyle: React.CSSProperties = {
+      textAlign: 'center',
+      borderBottom: '1px dashed #000',
+      paddingBottom: '8px',
+      marginBottom: '8px',
+    };
+
+    const infoSectionStyle: React.CSSProperties = {
+      marginBottom: '8px',
+      paddingBottom: '8px',
+      borderBottom: '1px dashed #000',
+    };
+
+    const infoLineStyle: React.CSSProperties = {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginBottom: '3px',
+      fontSize: '9pt',
+    };
+
+    const itemsSectionStyle: React.CSSProperties = {
+      marginBottom: '8px',
+    };
+
+    const itemsHeaderStyle: React.CSSProperties = {
+      fontWeight: 'bold',
+      marginBottom: '6px',
+      paddingBottom: '4px',
+      borderBottom: '1px solid #000',
+      fontSize: '9pt',
+    };
+
+    const itemStyle: React.CSSProperties = {
+      marginBottom: '6px',
+      paddingBottom: '6px',
+      borderBottom: '1px dotted #ccc',
+    };
+
+    const itemNameStyle: React.CSSProperties = {
+      fontWeight: 'bold',
+      marginBottom: '2px',
+      fontSize: '9pt',
+    };
+
+    const itemDetailStyle: React.CSSProperties = {
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: '8pt',
+    };
+
+    const totalsSectionStyle: React.CSSProperties = {
+      borderTop: '2px solid #000',
+      paddingTop: '8px',
+      marginTop: '4px',
+    };
+
+    const totalLineStyle: React.CSSProperties = {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginBottom: '4px',
+      fontSize: '9pt',
+    };
+
+    const grandTotalLineStyle: React.CSSProperties = {
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: '13pt',
+      fontWeight: 'bold',
+      borderTop: '1px dashed #000',
+      paddingTop: '4px',
+      marginTop: '4px',
+      marginBottom: '4px',
+    };
+
+    const footerStyle: React.CSSProperties = {
+      textAlign: 'center',
+      marginTop: '10px',
+      paddingTop: '8px',
+      borderTop: '1px dashed #000',
+      fontSize: '9pt',
+    };
+
     return (
       <div ref={ref} className="comprobante-print hidden print:block">
-        <style jsx>{`
-          @media print {
-            @page {
-              size: 80mm auto;
-              margin: 5mm;
-            }
-
-            body {
-              margin: 0;
-              padding: 0;
-            }
-
-            .comprobante-print {
-              display: block !important;
-              width: 80mm;
-              font-family: 'Courier New', monospace;
-              font-size: 10pt;
-              color: #000;
-              background: #fff;
-            }
-
-            .comprobante-header {
-              text-align: center;
-              border-bottom: 2px dashed #000;
-              padding-bottom: 10px;
-              margin-bottom: 10px;
-            }
-
-            .comprobante-title {
-              font-size: 14pt;
-              font-weight: bold;
-              margin-bottom: 5px;
-            }
-
-            .comprobante-info {
-              margin-bottom: 10px;
-              padding-bottom: 10px;
-              border-bottom: 1px dashed #000;
-            }
-
-            .comprobante-info-line {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 3px;
-            }
-
-            .comprobante-items {
-              margin-bottom: 10px;
-            }
-
-            .comprobante-item {
-              margin-bottom: 8px;
-              padding-bottom: 8px;
-              border-bottom: 1px dotted #ccc;
-            }
-
-            .comprobante-item-name {
-              font-weight: bold;
-              margin-bottom: 2px;
-            }
-
-            .comprobante-item-detail {
-              display: flex;
-              justify-content: space-between;
-              font-size: 9pt;
-            }
-
-            .comprobante-totals {
-              border-top: 2px solid #000;
-              padding-top: 10px;
-              margin-top: 10px;
-            }
-
-            .comprobante-total-line {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 5px;
-            }
-
-            .comprobante-total-line.final {
-              font-size: 12pt;
-              font-weight: bold;
-              border-top: 1px solid #000;
-              padding-top: 5px;
-              margin-top: 5px;
-            }
-
-            .comprobante-footer {
-              text-align: center;
-              margin-top: 15px;
-              padding-top: 10px;
-              border-top: 2px dashed #000;
-              font-size: 9pt;
-            }
-          }
-        `}</style>
-
-        <div className="comprobante-header">
-          <div className="comprobante-title">COMPROBANTE DE VENTA</div>
-          <div style={{ fontSize: '9pt' }}>{empresaNombre}</div>
-        </div>
-
-        <div className="comprobante-info">
-          <div className="comprobante-info-line">
-            <span>Fecha:</span>
-            <span>{formatearFecha(fecha)}</span>
+        <div style={baseStyle}>
+          {/* Header */}
+          <div style={headerStyle}>
+            <div style={{ fontWeight: 'bold', fontSize: '14pt', marginBottom: '3px' }}>
+              COMPROBANTE DE VENTA
+            </div>
+            <div style={{ fontSize: '9pt' }}>{empresaNombre}</div>
           </div>
-          <div className="comprobante-info-line">
-            <span>Cliente:</span>
-            <span>{clienteNombre}</span>
-          </div>
-        </div>
 
-        <div className="comprobante-items">
-          <div style={{ fontWeight: 'bold', marginBottom: '8px', borderBottom: '1px solid #000', paddingBottom: '5px' }}>
-            DETALLE DE PRODUCTOS
+          {/* Info Section */}
+          <div style={infoSectionStyle}>
+            <div style={infoLineStyle}>
+              <span>Fecha:</span>
+              <span>{formatearFecha(fecha)}</span>
+            </div>
+            <div style={{ ...infoLineStyle, fontWeight: 'bold' }}>
+              <span>Cliente:</span>
+              <span>{clienteNombre}</span>
+            </div>
           </div>
-          {items.map((item, index) => (
-            <div key={index} className="comprobante-item">
-              <div className="comprobante-item-name">
-                <span style={{ marginRight: '5px', color: '#666' }}>#{index + 1}</span>
-                {item.nombre}
+
+          {/* Items Section */}
+          <div style={itemsSectionStyle}>
+            <div style={itemsHeaderStyle}>
+              DETALLE DE PRODUCTOS
+            </div>
+            {items.map((item, index) => (
+              <div key={index} style={itemStyle}>
+                <div style={itemNameStyle}>
+                  <span style={{ marginRight: '4px', color: '#555' }}>#{index + 1}</span>
+                  {item.nombre}
+                </div>
+                <div style={itemDetailStyle}>
+                  <span>Cant: {item.cantidad}</span>
+                  <span>P/U: {formatCurrency(item.precioUnitario)}</span>
+                </div>
+                <div style={{ ...itemDetailStyle, fontWeight: 'bold', marginTop: '2px' }}>
+                  <span>Subtotal:</span>
+                  <span>{formatCurrency(item.subtotal)}</span>
+                </div>
               </div>
-              <div className="comprobante-item-detail">
-                <span>Cant: {item.cantidad}</span>
-                <span>P/U: {formatCurrency(item.precioUnitario)}</span>
-              </div>
-              <div className="comprobante-item-detail" style={{ fontWeight: 'bold', marginTop: '2px' }}>
-                <span>Subtotal:</span>
-                <span>{formatCurrency(item.subtotal)}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="comprobante-totals">
-          <div className="comprobante-total-line" style={{ fontSize: '10pt' }}>
-            <span>Total Items:</span>
-            <span>{items.reduce((sum, item) => sum + item.cantidad, 0)} unidades</span>
-          </div>
-          <div className="comprobante-total-line final">
-            <span>TOTAL:</span>
-            <span>{formatCurrency(total)}</span>
-          </div>
-          <div className="comprobante-total-line">
-            <span>Monto Pagado:</span>
-            <span>{formatCurrency(montoPagado)}</span>
-          </div>
-          {metodoPago && (
-            <div className="comprobante-total-line">
-              <span>Método de Pago:</span>
-              <span>{metodoPagoLabel[metodoPago]}</span>
+          {/* Totals Section */}
+          <div style={totalsSectionStyle}>
+            <div style={totalLineStyle}>
+              <span>Total Items:</span>
+              <span>{items.reduce((sum, item) => sum + item.cantidad, 0)} unidades</span>
             </div>
-          )}
-          {montoPagado > total && (
-            <div className="comprobante-total-line" style={{ color: '#059669', fontWeight: 'bold' }}>
-              <span>Vuelto:</span>
-              <span>{formatCurrency(montoPagado - total)}</span>
+            <div style={grandTotalLineStyle}>
+              <span>TOTAL:</span>
+              <span>{formatCurrency(total)}</span>
             </div>
-          )}
-          {montoPagado < total && (
-            <div className="comprobante-total-line" style={{ color: '#dc2626', fontWeight: 'bold' }}>
-              <span>Saldo Pendiente:</span>
-              <span>{formatCurrency(total - montoPagado)}</span>
+            <div style={totalLineStyle}>
+              <span>Monto Pagado:</span>
+              <span>{formatCurrency(montoPagado)}</span>
             </div>
-          )}
-        </div>
+            {metodoPago && (
+              <div style={totalLineStyle}>
+                <span>Metodo de Pago:</span>
+                <span>{metodoPagoLabel[metodoPago]}</span>
+              </div>
+            )}
+            {montoPagado > total && (
+              <div style={{ ...totalLineStyle, color: '#059669', fontWeight: 'bold' }}>
+                <span>Vuelto:</span>
+                <span>{formatCurrency(montoPagado - total)}</span>
+              </div>
+            )}
+            {montoPagado < total && (
+              <div style={{ ...totalLineStyle, color: '#dc2626', fontWeight: 'bold' }}>
+                <span>Saldo Pendiente:</span>
+                <span>{formatCurrency(total - montoPagado)}</span>
+              </div>
+            )}
+          </div>
 
-        <div className="comprobante-footer">
-          <div>¡Gracias por su compra!</div>
+          {/* Footer */}
+          <div style={footerStyle}>
+            <div>Gracias por su compra!</div>
+          </div>
         </div>
       </div>
     );

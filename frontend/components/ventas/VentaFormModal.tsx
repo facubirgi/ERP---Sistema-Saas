@@ -169,10 +169,10 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
 
       const content = comprobanteRef.current.innerHTML;
 
-      printWindow.document.write('<!DOCTYPE html>');
-      printWindow.document.write('<html><head>');
+      printWindow.document.write('<!DOCTYPE html><html><head>');
       printWindow.document.write('<meta charset="utf-8">');
       printWindow.document.write('<title>Comprobante de Venta</title>');
+      printWindow.document.write('<style>@page{size:80mm auto;margin:5mm;}*{box-sizing:border-box;}body{margin:0;padding:0;}</style>');
       printWindow.document.write('</head><body>');
       printWindow.document.write(content);
       printWindow.document.write('</body></html>');
@@ -660,6 +660,7 @@ export function VentaFormModal({ isOpen, onClose, onSuccess }: VentaFormModalPro
             total={total}
             montoPagado={parseFloat(montoPagado) || 0}
             metodoPago={parseFloat(montoPagado) > 0 ? metodoPago : undefined}
+            empresaNombre={user?.razonSocial}
             formatCurrency={formatCurrency}
           />
         </div>

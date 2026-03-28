@@ -85,13 +85,13 @@ export const generarPDFCotizacion = (data: CotizacionPDFData): void => {
   agregarLinea();
 
   // TÍTULO
-  agregarTexto('COTIZACIÓN', 40, 14, 'bold', 'center');
+  agregarTexto('COTIZACION', 40, 14, 'bold', 'center');
   y += 2;
 
   // NÚMERO Y FECHAS
-  agregarTexto(`N°: ${data.numeroComprobante}`, margen, 10, 'bold');
-  agregarTexto(`Fecha: ${formatearFecha(data.fechaEmision)}`, margen, 9);
-  agregarTexto(`Vence: ${formatearFecha(data.fechaVencimiento)}`, margen, 9);
+  agregarTexto(`N: ${data.numeroComprobante}`, margen, 10, 'bold');
+  agregarTexto(`Fecha Emision: ${formatearFecha(data.fechaEmision)}`, margen, 9);
+  agregarTexto(`Fecha Vence: ${formatearFecha(data.fechaVencimiento)}`, margen, 9);
   y += 2;
   agregarLinea();
 
@@ -111,7 +111,7 @@ export const generarPDFCotizacion = (data: CotizacionPDFData): void => {
     pdf.setFontSize(8);
     pdf.setFont('helvetica', 'bold');
     pdf.text(`#${index + 1}`, margen, y);
-    
+
     // Nombre del producto
     pdf.setFontSize(9);
     pdf.setFont('helvetica', 'normal');
@@ -131,7 +131,7 @@ export const generarPDFCotizacion = (data: CotizacionPDFData): void => {
     pdf.text(`Cant: ${item.cantidad}`, margen + 5, y);
     pdf.text(`P/U: ${formatearMonto(item.precioUnitario)}`, margen + 25, y);
     y += 4;
-    
+
     // Subtotal
     pdf.setFont('helvetica', 'bold');
     pdf.text('Subtotal:', margen + 5, y);
@@ -161,14 +161,14 @@ export const generarPDFCotizacion = (data: CotizacionPDFData): void => {
   // VALIDEZ
   pdf.setFontSize(8);
   pdf.setFont('helvetica', 'italic');
-  const textoValidez = 'Válida por 15 días';
+  const textoValidez = 'Valida por 15 dias';
   pdf.text(textoValidez, 40, y, { align: 'center' });
   y += 5;
 
   // MENSAJE FINAL
   pdf.setFontSize(9);
   pdf.setFont('helvetica', 'normal');
-  const mensajeFinal = '¡Gracias por su preferencia!';
+  const mensajeFinal = 'Gracias por su preferencia!';
   pdf.text(mensajeFinal, 40, y, { align: 'center' });
 
   // Generar nombre de archivo
